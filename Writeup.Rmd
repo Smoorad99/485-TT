@@ -15,6 +15,8 @@ library(dplyr)
 seer <- fread("C:/Users/cjhet/Documents/export.txt", header=TRUE)
 ```
 
+### Github Repo: <https://github.com/Smoorad99/485-TT>
+
 ### Research Questions:
 
 The questions we aim to solve with our data are the following:
@@ -211,9 +213,19 @@ table(seer$`Reason no cancer-directed surgery`)
 unique(seer$`Primary Site`)
 ```
 
-## Frankie:
+## Frankie: Cols 23-32
+
+Going through variables 23-32 from our original data set to verify
+quality in data. Making sure to remove columns that have too many
+missing variables. Removed columns 23-26 becasue they contained too many
+blanks.
 
 ## Saul: Cols 33-47
+
+I checked variables for suspicious values, changed variables from
+strings to numeric (when appropriate), and renamed variables for ease of
+use. I then dropped a few variables that did not add any useful
+information.
 
 ```{r}
 a <- seer[, 33:47] # Subsetting data
