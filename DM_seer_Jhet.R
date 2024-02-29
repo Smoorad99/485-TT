@@ -11,7 +11,7 @@ subset[subset == "Blank(s)"] <- NA
 subset <- subset %>% mutate(
   Sex = as.factor(Sex),
   Race.origin = as.factor(`Race and origin recode (NHW, NHB, NHAIAN, NHAPI, Hispanic)`),
-  Age = as.factor(`Age recode with <1 year olds`),
+  #Age = as.factor(`Age recode with <1 year olds`),
   Scope.Reg.LN.Sur = as.factor(`RX Summ--Scope Reg LN Sur (2003+)`),
   Surg.Oth.Reg.Dis = as.factor(`RX Summ--Surg Oth Reg/Dis (2003+)`),
   Surg.Rad.Seq = as.factor(`RX Summ--Surg/Rad Seq`),
