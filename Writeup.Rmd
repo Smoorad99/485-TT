@@ -1,6 +1,6 @@
 ---
 title: "Jhet: Cleaning"
-author: "Jhet Cabigas"
+author: "Jhet Cabigas, Saul Mooraidan"
 date: "2024-02-08"
 output: pdf_document
 editor_options: 
