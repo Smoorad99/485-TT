@@ -1,6 +1,7 @@
 
 library(data.table)
 library(dplyr)
+library(RSQLite)
 set.seed(1479)
 
 df <- fread("C:/data/export.txt")
@@ -15,7 +16,7 @@ colnames(a) <- gsub(" ", ".", colnames(a)) # replace spaces with periods
 colnames(b) <- gsub(" ", ".", colnames(b))
 
 # Three age variables... which do we want
-table(a$`Age.recode.with.<1.year.olds.and.90+`) # looks clean
+table(a$`Age.recode.with.<1.year.olds.and.90+`, ) # looks clean
 
 table(a$`Age.recode.with.single.ages.and.85+`) # if we decide we want this remove " years" and convert to numeric
 
@@ -90,3 +91,14 @@ saul_semiclean_vars <- a %>% select(age, cs.reg.node.eval.04.15, cs.tumor.size.e
                           benign.borderline.tumors, situ.malignant.tumors,
                           tm.1.1990.2003, tm.2.1990.2003, tm.3.1998.2003)
 
+
+## Checking if the gender of these codes are all male (they izz), this makes me more confident these are the right codes
+# testis <- df %>% 
+#   select(`Primary Site`, Sex) %>% 
+#   filter(`Primary Site` == 620 | `Primary Site` == 621 | `Primary Site` == 629)
+
+## Use the code below to filter the whole data set by the correct site (do at the)
+## Do it on your computer 
+# testis <- df %>% 
+#   select(...) %>% ## Replace elipsis with all vars we are deciding to use
+#   filter(`Primary Site` == 620 | `Primary Site` == 621 | `Primary Site` == 629)
