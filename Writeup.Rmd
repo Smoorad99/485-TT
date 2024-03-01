@@ -12,7 +12,7 @@ editor_options:
 library(data.table)
 library(dplyr)
 #read in data
-seer <- fread("C:/Users/cjhet/Documents/export.txt", header=TRUE)
+seer <- fread("C:/Users/cjhet/Documents/testis.txt", header=TRUE)
 ```
 
 ### Github Repo: <https://github.com/Smoorad99/485-TT>
