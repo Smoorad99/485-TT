@@ -5,13 +5,13 @@ library(dplyr)
 # testis <- seer %>% filter(`Primary Site` == 620 | `Primary Site` == 621 | `Primary Site` == 629)
 # write.csv(testis, "C:/Users/cjhet/Documents/testis.csv")
 testis <- read.csv("C:/Users/cjhet/Documents/testis.csv", header = TRUE)
-subset <- testis %>% select(2:12)
+subset <- testis %>% select(1:12)
 
 # NA's are recorded as "blank(s)", which isn't automatically detected
 subset[subset == "Blank(s)"] <- NA
 
 # change vars to factor or numeric where appropriate
-subset <- subset %>% 
+jhet_clean_vars <- subset %>% 
     mutate(
     Sex = as.factor(Sex),
     Scope.Reg.LN.Sur = as.factor(RX.Summ..Scope.Reg.LN.Sur..2003..),
@@ -19,4 +19,4 @@ subset <- subset %>%
     Surg.Rad.Seq = as.factor(RX.Summ..Surg.Rad.Seq),
     Systemic.Sur.Seq = as.factor(RX.Summ..Systemic.Sur.Seq..2007..),
     Months.diag.to.treat = as.numeric(Months.from.diagnosis.to.treatment)
-) %>% select(-c(2:11))
+) %>% select(-c(3:12))
