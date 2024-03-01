@@ -21,12 +21,23 @@ jhet_clean_vars <- subset %>%
     Systemic.Sur.Seq = as.factor(RX.Summ..Systemic.Sur.Seq..2007..),
     Months.diag.to.treat = ifelse(as.numeric(Months.from.diagnosis.to.treatment) == 0, "<1", "1+")
 ) %>% select(-c(3:12))
+# The age and race/origin variables that were kept last assignment have now been removed, as we have better versions of the same information.
+# After filtering by positive testicular cancer, the sex variable contains only male observations, but is being kept for now as a control variable.
+# Months.diag.to.treat has an overwhelming amount of observations at 0, compared to every other number. Thus, we made it a binary variable.
+
+summary(jhet_clean_vars)
+
+# Because all of the variables are categorical now, statistics such as mean, median, and standard deviation are not applicable.
+# Instead, we can see the frequency distributions above in count form, as well as visualized below.
 
 #50522 rows
 ggplot(jhet_clean_vars, aes(x=Scope.Reg.LN.Sur)) +
   geom_bar(aes(fill=Scope.Reg.LN.Sur)) +
   theme(axis.text.x=element_blank(),
         legend.text=element_text(size=6))
+# This variable contains data relating to the scope of surgery done to regional lymph nodes. Most of the cases are "none", meaning no surgery was done.
+# Besides NA, the next highest number of observations is in the 4+ lymph nodes removed category, followed by 1-3.
+# From this we can discern that removal of lymph nodes is uncommon, but becomes more necessary the more positive nodes there are.
 
 ggplot(jhet_clean_vars, aes(x=Surg.Oth.Reg.Dis)) +
   geom_bar(aes(fill=Surg.Oth.Reg.Dis)) +
