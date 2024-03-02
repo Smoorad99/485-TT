@@ -8,7 +8,8 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 library(data.table)
-
+library("readxl")
+library(ggplot2)
 ```
 
 ```{r}
@@ -50,9 +51,31 @@ table(df$`Reason no cancer-directed surgery`)
 unique(df$`Primary Site`)
 ```
 
-No data on these variables. Every entry is listed as "Blank(s)"
-`Radiation to Brain or CNS Recode (1988-1997)`
-`Site specific surgery (1973-1997 varying detail by year and site)`
+
+```{r}
+ex_data <- read_excel("C:/Users/15307/Downloads/testis.xlsx")
+```
+
+```{r}
+names(ex_data)[names(ex_data) == "CS Tumor Size/Ext Eval (2004-2015)"] <- "tumor_size"
+```
+
+```{r}
+ex_data$tumor_size = as.numeric(ex_data$tumor_size)
+ex_data[ex_data =="Blank(s)"] <- NA
+
+```
 
 
+```{r}
+unique(ex_data$tumor_size)
+summary(ex_data$tumor_size, na.rm = TRUE)
+sd(ex_data$tumor_size, na.rm = TRUE)
+```
+
+```{r}
+ggplot(data = ex_data, aes(x = tumor_size))+
+  geom_histogram(fill="blue",color="white")+
+  labs(x='Tumor Size', y='Frequency', title = 'Tumor Size Histogram')
+```
 
