@@ -2,7 +2,7 @@
 title: "Data Cleaning"
 author: "Chase Mayfield"
 date: "`r Sys.Date()`"
-output: html_document
+output: pdf_document
 ---
 
 
@@ -22,7 +22,7 @@ names(df)
 ```
 
 
-```{r}
+```{r, include=FALSE}
 table(df$`AFP Post-Orchiectomy Lab Value Recode (2010+)`)
 factor(df$`hCG Post-Orchiectomy Range Recode (2010+)`,labels=c("5,000-50,000", "Above normal and less than 5,000 MIU/mL", "Blank(s)", "Greater than 50,000" , "Blank(s)", "Blank(s)", "Blank(s)", "normal"))
 ```
