@@ -1,0 +1,313 @@
+---
+title: "Jhet: Cleaning"
+author: "Jhet Cabigas, Saul Mooraidan"
+date: "2024-02-08"
+output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+library(data.table)
+library(dplyr)
+#read in data
+seer <- fread("C:/Users/cjhet/Documents/testis.txt", header=TRUE)
+```
+
+### Github Repo: <https://github.com/Smoorad99/485-TT>
+
+### Research Questions:
+
+The questions we aim to solve with our data are the following:
+
+-   How does race affect survival rate/months survived for testi cancer?
+
+    -   Exploring the role race plays in testicular cancer survival
+        rates could help us address disparities between different races.
+        If we find that survival rate of testicular cancer is impacted
+        by race, it would push us to explore why this may be. For
+        example, it may indicate inequality in healthcare received by
+        different races. 
+
+-   How does socioeconomic standing affect survival rate/months survived
+    for testi cancer?
+
+    -   Socioeconomic status can impact the quality of healthcare an
+        individual has (among other things), which we expect to impact
+        testicular cancer survival rate. Exploring this could help us
+        address if there is a significant relationship between
+        socioeconomic status and testicular cancer survival rate.
+        Suppose the difference is significant and the magnitude is
+        great. In that case, it may suggest that a policy change could
+        be beneficial (i.e., allocate more taxpayer money to healthcare
+        for individuals in lower socioeconomic brackets).
+
+-   How does survival rate/months change based on treatment options for
+    testi cancer?
+
+    -   Exploring the relationship between survival rate/months and
+        treatment method helps us understand which treatment methods are
+        most effective. Investigating the quality of life patients
+        experience while undergoing different treatments may also help
+        us better understand the effectiveness of each treatment.
+
+-   Has the survival rate of testi cancer increased/decreased over
+    time? 
+
+    -   Knowing the direction in which the survival rate moves allows us
+        to question why it moves in said direction. If the survival rate
+        has increased over time, we may ask: Has better
+        medicine/treatment options led to this increase in survival
+        rate?
+
+## Jhet: Data retrieval, Cols 1-11
+
+### Retrieval:
+
+Using SEERStat, we retrieved a text file containing x observations for
+the following variables:
+
+-   race
+
+-   sex
+
+-   year of diagnosis
+
+-   primary site
+
+-   RX Summ (all 6)
+
+-   Reason no cancer-directed surgery
+
+-   Radiation recode
+
+-   Chemotherapy recode
+
+-   Scope of reg lymph nd surg
+
+-   Surgery of other reg/dis sites
+
+-   Site specific surgery
+
+-   Radiation to brain or cns recode?
+
+-   Months from diagnosis to treatment
+
+-   AFP Post-orchiectomy lab value recode?
+
+-   hCG post-orchiectomy range recode
+
+-   LDH post-orchiectomy range recode
+
+-   Number of Examined Pelvic Nodes 
+
+-   Number of Positive Para-Aortic Nodes
+
+-   Number of Positive Pelvic Nodes
+
+-   Peritoneal Cytology
+
+-   Lymph-vascular Invasion
+
+-   CS tumor size (2004-2015) 
+
+-   Regional nodes examined
+
+-   Regional nodes positive
+
+-   CS lymph nodes
+
+-   CS mets at dx
+
+-   CS Tumor Size/Ext Eval
+
+-   CS Reg Node Eval
+
+-   Tumor marker 1
+
+-   Tumor marker 2
+
+-   Tumor marker 3
+
+-   Survival months
+
+-   Survival months flags
+
+-   First malignant primary indicator
+
+-   Total number of in situ/malignant tumors for patient
+
+-   Total number of benign/borderline tumors for patient
+
+-   Race/ethnicity
+
+-   Race and origin recode (NHW, NHB, NHAIAN, NHAPI, Hispanic
+
+-   Age recode with \<1 year olds and 90+
+
+-   Age recode with single ages and 85+
+
+-   Age recode with single ages and 90+
+
+-   Race recode (W, B, AI, API)
+
+-   Marital status at diagnosis
+
+### Data cleaning:
+
+The variables are relatively clean, and only require some recoding as
+factor or numeric variables instead of strings. Beyond that, NA's are
+recorded as "Blank(s)", which needed to be changed.
+
+```{r}
+subset <- seer %>% select(1:11)
+
+subset[subset == "Blank(s)"] <- NA
+subset <- subset %>% mutate(
+  Sex = as.factor(Sex),
+  `Race and origin recode (NHW, NHB, NHAIAN, NHAPI, Hispanic)` = as.factor(`Race and origin recode (NHW, NHB, NHAIAN, NHAPI, Hispanic)`),
+  `Age recode with <1 year olds` = as.factor(`Age recode with <1 year olds`), # REMOVE
+  `RX Summ--Scope Reg LN Sur (2003+)` = as.factor(`RX Summ--Scope Reg LN Sur (2003+)`),
+  `RX Summ--Surg Oth Reg/Dis (2003+)` = as.factor(`RX Summ--Surg Oth Reg/Dis (2003+)`),
+  `RX Summ--Surg/Rad Seq` = as.factor(`RX Summ--Surg/Rad Seq`),
+  `RX Summ--Reg LN Examined (1998-2002)` = as.numeric(`RX Summ--Reg LN Examined (1998-2002)`),
+  `RX Summ--Systemic/Sur Seq (2007+)` = as.factor(`RX Summ--Systemic/Sur Seq (2007+)`),
+  `Months from diagnosis to treatment` = as.numeric(`Months from diagnosis to treatment`)
+)
+```
+
+## Chase: Cols 12-22
+
+Used tables and frequency tables to analyze the columns. One variable
+was factored, every entry is listed as "Blank(s)" in
+`Radiation to Brain or CNS Recode (1988-1997)` and
+`Site specific surgery (1973-1997 varying detail by year and site)`.
+
+```{r}
+names(seer)
+```
+
+```{r}
+table(seer$`AFP Post-Orchiectomy Lab Value Recode (2010+)`)
+factor(seer$`hCG Post-Orchiectomy Range Recode (2010+)`,labels=c("5,000-50,000", "Above normal and less than 5,000 MIU/mL", "Blank(s)", "Greater than 50,000" , "Blank(s)", "Blank(s)", "Blank(s)", "normal"))
+```
+
+```{r}
+table(seer$`AFP Post-Orchiectomy Lab Value Recode (2010+)`)
+
+```
+
+```{r}
+table(seer$`Surgery of oth reg/dis sites (1998-2002)`)
+table(seer$`Scope of reg lymph nd surg (1998-2002)`)
+```
+
+```{r}
+table(seer$`Chemotherapy recode (yes, no/unk)`)
+table(seer$`Radiation recode`)
+table(seer$`Reason no cancer-directed surgery`)
+```
+
+```{r}
+unique(seer$`Primary Site`)
+```
+
+## Frankie: Cols 23-32
+
+Going through variables 23-32 from our original data set to verify
+quality in data. Making sure to remove columns that have too many
+missing variables. Removed columns 23-26 becasue they contained too many
+blanks.
+
+## Saul: Cols 33-47
+
+I checked variables for suspicious values, changed variables from
+strings to numeric (when appropriate), and renamed variables for ease of
+use. I then dropped a few variables that did not add any useful
+information.
+
+```{r}
+a <- seer[, 33:47] # Subsetting data
+b <- a # For reference
+rm(seer)
+
+colnames(a) <- gsub(" ", ".", colnames(a)) # replace spaces with periods
+colnames(b) <- gsub(" ", ".", colnames(b))
+
+# Three age variables... which do we want
+table(a$`Age.recode.with.<1.year.olds.and.90+`) # looks clean
+
+table(a$`Age.recode.with.single.ages.and.85+`) # if we decide we want this remove " years" and convert to numeric
+
+table(a$`Age.recode.with.single.ages.and.90+`) # same as above
+
+a$`Age.recode.with.single.ages.and.90+` <- gsub(" years", "",a$`Age.recode.with.single.ages.and.90+`) 
+
+table(a$`Age.recode.with.single.ages.and.90+`)
+
+a <- a %>% 
+  mutate(
+    `CS.Reg.Node.Eval.(2004-2015)` = as.numeric(`CS.Reg.Node.Eval.(2004-2015)`),
+    `CS.Tumor.Size/Ext.Eval.(2004-2015)` = as.numeric(`CS.Tumor.Size/Ext.Eval.(2004-2015)`)
+    )
+
+
+table(a$`CS.Reg.Node.Eval.(2004-2015)`)
+table(b$`CS.Reg.Node.Eval.(2004-2015)`) # Check recode
+
+table(a$`CS.Tumor.Size/Ext.Eval.(2004-2015)`)
+table(b$`CS.Tumor.Size/Ext.Eval.(2004-2015)`) # Check recode
+
+
+table(a$Marital.status.at.diagnosis) # looks clean... Were non-answers replaced with 'Unknown'?
+table(a$`Race.recode.(W,.B,.AI,.API)`) # Looks clean
+
+table(a$`Race/ethnicity`) #Looks clean
+
+a$Survival.months <- as.numeric(a$Survival.months)
+
+table(a$Survival.months)
+table(b$Survival.months) # Check recode
+
+table(a$Survival.months.flag) # Looks clean
+
+table(a$`Total.number.of.benign/borderline.tumors.for.patient`) # Looks clean, not sure if this variableis worth keeping due the distribution of responses
+
+table(a$`Total.number.of.in.situ/malignant.tumors.for.patient`)
+
+a$`Total.number.of.in.situ/malignant.tumors.for.patient` <- as.numeric(a$`Total.number.of.in.situ/malignant.tumors.for.patient`)
+
+table(a$`Total.number.of.in.situ/malignant.tumors.for.patient`)
+table(b$`Total.number.of.in.situ/malignant.tumors.for.patient`) # Checking recode
+
+table(a$`Tumor.marker.1.(1990-2003)`) # Not sure how to treat these tumor marker variables, need a better understanding of what they are before deciding
+
+table(a$`Tumor.marker.2.(1990-2003)`)
+
+table(a$`Tumor.marker.3.(1998-2003)`)
+
+
+## Changing names of variables we want to keep
+a <- a %>% 
+  mutate(
+    age = `Age.recode.with.single.ages.and.90+`,
+    cs.reg.node.eval.04.15 = `CS.Reg.Node.Eval.(2004-2015)`,
+    cs.tumor.size.ext.eval.04.15 = `CS.Tumor.Size/Ext.Eval.(2004-2015)`,
+    race.recode = `Race.recode.(W,.B,.AI,.API)`,
+    race.ethnicity = `Race/ethnicity`,
+    survival.months = Survival.months,
+    survival.months.flag = Survival.months.flag,
+    marital.status.at.diagnosis = Marital.status.at.diagnosis,
+    benign.borderline.tumors = `Total.number.of.benign/borderline.tumors.for.patient`,
+    situ.malignant.tumors = `Total.number.of.in.situ/malignant.tumors.for.patient`,
+    tm.1.1990.2003 = `Tumor.marker.1.(1990-2003)`,
+    tm.2.1990.2003 = `Tumor.marker.2.(1990-2003)`,
+    tm.3.1998.2003 = `Tumor.marker.3.(1998-2003)`)
+
+saul_semiclean_vars <- a %>% select(age, cs.reg.node.eval.04.15, cs.tumor.size.ext.eval.04.15,
+                          race.recode, race.ethnicity, survival.months,
+                          survival.months.flag, Marital.status.at.diagnosis, 
+                          benign.borderline.tumors, situ.malignant.tumors,
+                          tm.1.1990.2003, tm.2.1990.2003, tm.3.1998.2003)
+```

@@ -3,7 +3,6 @@ title: "Data Cleaning"
 author: "Chase Mayfield"
 date: "`r Sys.Date()`"
 output: pdf_document
----
 
 
 

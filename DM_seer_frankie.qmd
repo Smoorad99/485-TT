@@ -1,0 +1,61 @@
+---
+title: "28_32_variables"
+format: html
+editor: visual
+---
+
+```{r}
+
+export <- read.csv("C:/Users/fvara/Downloads/export/export.txt", header=TRUE)
+
+
+```
+
+```{r}
+
+export_test <- read.csv("C:/Users/fvara/Downloads/export/export.txt", header=FALSE)
+
+
+```
+
+```{r}
+
+library(tidyverse)
+
+export <- select(export, -c('Number.of.Examined.Pelvic.Nodes.Recode..2010..':'Lymph.vascular.Invasion..2004..varying.by.schema.'))
+                 
+                
+
+
+```
+
+```{r}
+
+
+export$CS.tumor.size..2004.2015.[export$CS.tumor.size..2004.2015. == "Blank(s)"] <- NA
+
+
+export$Regional.nodes.examined..1988..[export$Regional.nodes.examined..1988.. == "Blank(s)"] <- NA
+
+export$Regional.nodes.positive..1988..[export$Regional.nodes.positive..1988.. == "Blank(s)"] <- NA
+
+export$CS.lymph.nodes..2004.2015.[export$CS.lymph.nodes..2004.2015. == "Blank(s)"] <- NA
+
+export$CS.mets.at.dx..2004.2015.[export$CS.mets.at.dx..2004.2015. == "Blank(s)"] <- NA
+
+
+```
+
+```{r}
+
+names(export)[names(export) == "CS.tumor.size..2004.2015."] <- "CS_tumor_size"
+
+names(export)[names(export) == "Regional.nodes.examined..1988.."] <- "Regional_node_examined"
+
+names(export)[names(export) == "Regional.nodes.positive..1988.."] <- "Regional_positive_node"
+
+names(export)[names(export) == "CS.lymph.nodes..2004.2015."] <- "CS_lymph_node"
+
+names(export)[names(export) == "CS.mets.at.dx..2004.2015."] <- "CS_mets_dx"
+
+```
