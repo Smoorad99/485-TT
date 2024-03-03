@@ -59,3 +59,86 @@ names(export)[names(export) == "CS.lymph.nodes..2004.2015."] <- "CS_lymph_node"
 names(export)[names(export) == "CS.mets.at.dx..2004.2015."] <- "CS_mets_dx"
 
 ```
+
+```{r}
+
+export$CS_tumor_size <- as.numeric(as.character(export$CS_tumor_size))
+
+# Create the new variable 'tumor_size_mod' based on the conditions
+export$tumor_size_mod <- ifelse(export$CS_tumor_size == 000, 0, # No mass/tumor
+                                ifelse(export$CS_tumor_size >= 001 & export$CS_tumor_size <= 988, export$CS_tumor_size, # Exact size in mm
+                                ifelse(export$CS_tumor_size == 989, 989, # 989 mm or larger
+                                ifelse(export$CS_tumor_size == 990, 0.5, # Microscopic, no given size, assume 0.5mm as a placeholder
+                                ifelse(export$CS_tumor_size == 991, 5, # Less than 1 cm, use 5mm as the midpoint
+                                ifelse(export$CS_tumor_size == 992, 15, # Less than 2 cm, use 15mm as the midpoint
+                                ifelse(export$CS_tumor_size == 993, 25, # Less than 3 cm, use 25mm as the midpoint
+                                ifelse(export$CS_tumor_size == 994, 35, # Less than 4 cm, use 35mm as the midpoint
+                                ifelse(export$CS_tumor_size == 995, 45, # Less than 5 cm, use 45mm as the midpoint
+                                ifelse(export$CS_tumor_size >= 996 & export$CS_tumor_size <= 998, NA, # Site-specific codes, handle as NA or a specific rule if applicable
+                                ifelse(export$CS_tumor_size == 999 | export$CS_tumor_size == 888 | export$CS_tumor_size == 1022, NA, # Unknown, Not applicable, or Blank, handle as NA
+                                NA))))))))))) # Default case to catch any unhandled values
+
+
+
+```
+
+```{r}
+
+hist(export$CS_tumor_size, breaks = 100)
+
+
+```
+
+```{r}
+#modifying regional nodes examined 
+
+# Step 1: Create a new numeric variable for the exact number of nodes examined
+export$nodes_examined_num <- ifelse(export$Regional_node_examined >= 01 & export$Regional_node_examined <= 89, export$Regional_node_examined,
+                                    ifelse(export$Regional_node_examined == 90, 90, NA))
+
+# Step 2: Create a new categorical variable for special conditions
+export$nodes_examined_cat <- ifelse(export$Regional_node_examined == 00, "No nodes examined",
+                                    ifelse(export$Regional_node_examined == 95, "Aspiration performed",
+                                    ifelse(export$Regional_node_examined == 96, "Sampling, number unknown",
+                                    ifelse(export$Regional_node_examined == 97, "Dissection, number unknown",
+                                    ifelse(export$Regional_node_examined == 98, "Removed, number unknown",
+                                    ifelse(export$Regional_node_examined == 99, "Unknown",
+                                    ifelse(export$Regional_node_examined == 126, "Blank", "Exact number")))))))
+
+```
+
+```{r}
+
+#modifying regional nodes positive
+
+# Step 1: Numeric variable for the exact number of positive nodes
+export$positive_nodes_num <- ifelse(export$Regional_positive_node >= 1 & export$Regional_positive_node <= 89, export$Regional_positive_node,
+                                    ifelse(export$Regional_positive_node == 90, 90, NA))
+
+# Step 2: Categorical variable for special conditions
+export$positive_nodes_cat <- ifelse(export$Regional_positive_node == 0, "All nodes negative",
+                                    ifelse(export$Regional_positive_node == 95, "Positive aspiration performed",
+                                    ifelse(export$Regional_positive_node == 97, "Positive, number unspecified",
+                                    ifelse(export$Regional_positive_node == 98, "No nodes examined",
+                                    ifelse(export$Regional_positive_node == 99, "Unknown",
+                                    ifelse(export$Regional_positive_node == 126, "Blank", NA)))))) # Using NA for 'Exact number positive' to keep only special conditions
+
+# Optional: Convert the categorical variable into a factor for easier handling in certain types of analyses
+export$positive_nodes_cat <- factor(export$positive_nodes_cat)
+
+
+
+```
+
+```{r}
+
+export <- export %>% 
+   filter(Primary.Site == 620 | Primary.Site == 621 | Primary.Site == 629)
+
+```
+
+```{r}
+
+hist(export$CS_tumor_size, breaks = 1000)
+
+```
