@@ -2,11 +2,8 @@
 author: Saul, Jhet, Frankie, and Chase
 title: "Testicular Cancer EDA"
 format:
-  html:
-    code-fold: true
+  pdf:
     warning: false
-editor: visual
-
 ---
 # Research Questions:
 -   Github Repo: <https://github.com/Smoorad99/485-TT>
