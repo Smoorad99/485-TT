@@ -140,5 +140,24 @@ export <- export %>%
 ```{r}
 
 hist(export$CS_tumor_size, breaks = 1000)
+summary(export$CS_tumor_size)
 
+```
+
+```{r}
+#Numcriacal variable of nodes examined
+summary(export$nodes_examined_num)
+
+#Categorical varailable for nodes examined
+table(export$nodes_examined_cat)
+
+
+```
+
+```{r}
+#positive nodes numerical variable
+summary(export$positive_nodes_num)
+
+#categorical nodes numerical variable
+table(export$positive_nodes_cat)
 ```
