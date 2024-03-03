@@ -63,7 +63,6 @@ names(ex_data)[names(ex_data) == "CS Tumor Size/Ext Eval (2004-2015)"] <- "tumor
 ```{r}
 ex_data$tumor_size = as.numeric(ex_data$tumor_size)
 ex_data[ex_data =="Blank(s)"] <- NA
-
 ```
 
 

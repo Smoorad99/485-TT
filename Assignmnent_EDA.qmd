@@ -1,7 +1,360 @@
 ---
-title: "TestiAnalysis"
-format: html
+author: Saul, Jhet, Frankie, and Chase
+title: "Testicular Cancer EDA"
+format:
+  html:
+    code-fold: true
+    warning: false
 editor: visual
----
 
- 
+---
+# Research Questions:
+-   Github Repo: <https://github.com/Smoorad99/485-TT>
+
+The questions we aim to solve with our data are the following:
+
+-   How does race affect survival rate/months survived for testi cancer?
+
+    -   Exploring the role race plays in testicular cancer survival
+        rates could help us address disparities between different races.
+        If we find that survival rate of testicular cancer is impacted
+        by race, it would push us to explore why this may be. For
+        example, it may indicate inequality in healthcare received by
+        different races.
+
+-   How does survival rate/months change based on treatment options for
+    testi cancer?
+
+    -   Exploring the relationship between survival rate/months and
+        treatment method helps us understand which treatment methods are
+        most effective. Investigating the quality of life patients
+        experience while undergoing different treatments may also help
+        us better understand the effectiveness of each treatment.
+
+-   Has the survival rate of testi cancer increased/decreased over
+    time? 
+
+    -   Knowing the direction in which the survival rate moves allows us
+        to question why it moves in said direction. If the survival rate
+        has increased over time, we may ask: Has better
+        medicine/treatment options led to this increase in survival
+        rate?
+
+# Data Management
+```{r}
+library(dplyr)
+library(ggplot2)
+df <- read.csv("C:/data/testis.csv") # This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.
+df[df == "Blank(s)"] <- NA
+```
+
+
+```{r}
+# Jhet's DM
+df <- df %>% 
+    mutate(
+    Sex = as.factor(Sex),
+    Scope.Reg.LN.Sur = as.factor(RX.Summ..Scope.Reg.LN.Sur..2003..),
+    Surg.Oth.Reg.Dis = as.factor(RX.Summ..Surg.Oth.Reg.Dis..2003..),
+    Surg.Rad.Seq = as.factor(ifelse(RX.Summ..Surg.Rad.Seq == "No radiation and/or cancer-directed surgery", "None", "Surg and or rad")),
+    Systemic.Sur.Seq = as.factor(RX.Summ..Systemic.Sur.Seq..2007..),
+    Months.diag.to.treat = ifelse(as.numeric(Months.from.diagnosis.to.treatment) == 0, "<1", "1+")
+) %>% select(-c(3:12))
+```
+
+
+```{r}
+#Chase's DM
+df <- df %>% 
+  mutate(tumor_size = as.numeric("CS Tumor Size/Ext Eval (2004-2015)"))
+```
+
+```{r}
+# Frakie's DM
+df <- select(df, -c('Number.of.Examined.Pelvic.Nodes.Recode..2010..':'Lymph.vascular.Invasion..2004..varying.by.schema.'))
+
+names(df)[names(df) == "CS.tumor.size..2004.2015."] <- "CS_tumor_size"
+names(df)[names(df) == "Regional.nodes.examined..1988.."] <- "Regional_node_examined"
+names(df)[names(df) == "Regional.nodes.positive..1988.."] <- "Regional_positive_node"
+names(df)[names(df) == "CS.lymph.nodes..2004.2015."] <- "CS_lymph_node"
+names(df)[names(df) == "CS.mets.at.dx..2004.2015."] <- "CS_mets_dx"
+```
+
+
+```{r}
+df$CS_tumor_size <- as.numeric(as.character(df$CS_tumor_size))
+
+# Create the new variable 'tumor_size_mod' based on the conditions
+df$tumor_size_mod <- ifelse(df$CS_tumor_size == 000, 0, # No mass/tumor
+                                ifelse(df$CS_tumor_size >= 001 & df$CS_tumor_size <= 988, df$CS_tumor_size, # Exact size in mm
+                                ifelse(df$CS_tumor_size == 989, 989, # 989 mm or larger
+                                ifelse(df$CS_tumor_size == 990, 0.5, # Microscopic, no given size, assume 0.5mm as a placeholder
+                                ifelse(df$CS_tumor_size == 991, 5, # Less than 1 cm, use 5mm as the midpoint
+                                ifelse(df$CS_tumor_size == 992, 15, # Less than 2 cm, use 15mm as the midpoint
+                                ifelse(df$CS_tumor_size == 993, 25, # Less than 3 cm, use 25mm as the midpoint
+                                ifelse(df$CS_tumor_size == 994, 35, # Less than 4 cm, use 35mm as the midpoint
+                                ifelse(df$CS_tumor_size == 995, 45, # Less than 5 cm, use 45mm as the midpoint
+                                ifelse(df$CS_tumor_size >= 996 & df$CS_tumor_size <= 998, NA, # Site-specific codes, handle as NA or a specific rule if applicable
+                                ifelse(df$CS_tumor_size == 999 | df$CS_tumor_size == 888 | df$CS_tumor_size == 1022, NA, # Unknown, Not applicable, or Blank, handle as NA
+                                NA))))))))))) # Default case to catch any unhandled values
+```
+
+```{r}
+#modifying regional nodes examined 
+
+# Step 1: Create a new numeric variable for the exact number of nodes examined
+df$nodes_examined_num <- ifelse(df$Regional_node_examined >= 01 & df$Regional_node_examined <= 89, df$Regional_node_examined,
+                                    ifelse(df$Regional_node_examined == 90, 90, NA))
+
+# Step 2: Create a new categorical variable for special conditions
+df$nodes_examined_cat <- ifelse(df$Regional_node_examined == 00, "No nodes examined",
+                                    ifelse(df$Regional_node_examined == 95, "Aspiration performed",
+                                    ifelse(df$Regional_node_examined == 96, "Sampling, number unknown",
+                                    ifelse(df$Regional_node_examined == 97, "Dissection, number unknown",
+                                    ifelse(df$Regional_node_examined == 98, "Removed, number unknown",
+                                    ifelse(df$Regional_node_examined == 99, "Unknown",
+                                    ifelse(df$Regional_node_examined == 126, "Blank", "Exact number")))))))
+
+```
+
+```{r}
+
+#modifying regional nodes positive
+
+# Step 1: Numeric variable for the exact number of positive nodes
+df$positive_nodes_num <- ifelse(df$Regional_positive_node >= 1 & df$Regional_positive_node <= 89, df$Regional_positive_node,
+                                    ifelse(df$Regional_positive_node == 90, 90, NA))
+
+# Step 2: Categorical variable for special conditions
+df$positive_nodes_cat <- ifelse(df$Regional_positive_node == 0, "All nodes negative",
+                                    ifelse(df$Regional_positive_node == 95, "Positive aspiration performed",
+                                    ifelse(df$Regional_positive_node == 97, "Positive, number unspecified",
+                                    ifelse(df$Regional_positive_node == 98, "No nodes examined",
+                                    ifelse(df$Regional_positive_node == 99, "Unknown",
+                                    ifelse(df$Regional_positive_node == 126, "Blank", NA)))))) # Using NA for 'Exact number positive' to keep only special conditions
+
+# Optional: Convert the categorical variable into a factor for easier handling in certain types of analyses
+df$positive_nodes_cat <- factor(df$positive_nodes_cat)
+```
+
+
+```{r}
+#Saul's DM
+df$`Age.recode.with.single.ages.and.90.` <- gsub(
+  " years","",df$`Age.recode.with.single.ages.and.90.`)
+df <- df %>% 
+  mutate(
+    age = as.numeric(`Age.recode.with.single.ages.and.90.`),
+    race = `Race.recode..W..B..AI..API.`,
+    survival.months = as.numeric(Survival.months),
+    marital.status.at.diagnosis = Marital.status.at.diagnosis,
+    situ.malignant.tumors = as.numeric(`Total.number.of.in.situ.malignant.tumors.for.patient`),
+    tm.3.1998.2003 = `Tumor.marker.3..1998.2003.`)
+
+# Other recodes
+df <- df %>% mutate(
+  situ.malignant.tumors = ifelse(situ.malignant.tumors == 1, "One tumor",
+                                 ifelse(situ.malignant.tumors > 1,
+                                        "More than one tumor", NA)),
+  tm.3.1998.2003 = recode(tm.3.1998.2003, 
+                          "0" = "None Done (SX)",
+                          "2" = "Within normal limits (S0)",
+                          "4" = "Range 1 (S1) <1.5 x upper limit of normal for LDH assay",
+                          "5" = "Range 2 (S2) 1.5 – 10 x upper limit of normal for LDH assay",
+                          "6" = "Range 3 (S3) >10 x upper limit of normal for LDH assay",
+                          "8" = "Ordered, results not in chart",
+                          "9" = "Unknown or no information",
+                          "14" = " Blank")
+)
+
+df <- df %>% select(X, age,
+                    race, survival.months,
+                    marital.status.at.diagnosis, 
+                    situ.malignant.tumors,
+                    tm.3.1998.2003,
+                    Sex,
+                    Scope.Reg.LN.Sur,
+                    Surg.Oth.Reg.Dis,
+                    Surg.Rad.Seq,
+                    Systemic.Sur.Seq,
+                    Months.diag.to.treat,CS_tumor_size,
+                    Regional_node_examined,
+                    Regional_positive_node,
+                    CS_lymph_node,
+                    CS_mets_dx,
+                    tumor_size_mod,
+                    nodes_examined_num,
+                    Regional_node_examined,
+                    nodes_examined_cat)
+```
+
+
+# Explorartory Data Analysis
+
+## Jhet
+```{r}
+summary(df)
+```
+
+Because many of the variables are categorical now, statistics such as mean, median, and standard deviation are not applicable.
+
+Instead, we can see the frequency distributions above in count form, as well as visualized below.
+
+```{r}
+#50522 rows
+ggplot(df, aes(x=Scope.Reg.LN.Sur)) +
+  geom_bar(aes(fill=Scope.Reg.LN.Sur)) +
+  theme(axis.text.x=element_blank(),
+        legend.text=element_text(size=6))
+```
+
+This variable contains data relating to the scope of surgery done to regional lymph nodes. Most of the cases are "none", meaning no surgery was done.
+Besides NA, the next highest number of observations is in the 4+ lymph nodes removed category, followed by 1-3.
+
+From this we can discern that removal of lymph nodes is uncommon, but becomes more necessary the more positive nodes there are.
+
+<br/>
+
+```{r}
+ggplot(df, aes(x=Surg.Oth.Reg.Dis)) +
+  geom_bar(aes(fill=Surg.Oth.Reg.Dis)) +
+  theme(axis.text.x=element_blank(),
+        legend.text=element_text(size=6))
+```
+
+Surg.Oth.Reg.Dis stands for "surgery to other distant regions", and over ~42,000 out of 50,000 observations are in the "none/diagnosed at autopsy" category.
+
+Another 6000 of the remaining 8000 are NA's, meaning the variable contains little meaningful data for our investigations.
+
+<br/>
+
+```{r}
+table(df$RX.Summ..Surg.Rad.Seq)
+ggplot(df, aes(x=Surg.Rad.Seq)) +
+  geom_bar(aes(fill=Surg.Rad.Seq)) +
+  theme(axis.text.x=element_blank(),
+        legend.text=element_text(size=6))
+```
+
+The categories in this variable originally contained the order of surgery and or radiation. However, ~40,000 were again contained in the No surgery category.
+
+Thus, the variable is collapsed into just two levels, one in which no surgery or radiation was used, and another where one or both were used.
+
+<br/>
+
+```{r}
+ggplot(df, aes(x=Systemic.Sur.Seq)) +
+  geom_bar(aes(fill=Systemic.Sur.Seq)) +
+  theme(axis.text.x=element_blank(),
+        legend.text=element_text(size=6))
+```
+
+Similar to the previous variable, this one contains data involving the sequence of systemic surgery and therapy. Most of the observations are in the none level, another large portion are patients that got systemic therapy after surgery, and another large chunk is NA's.
+
+The presence of two substantial categories makes this a useful variable for our treatment related data science question.
+
+<br/>
+
+```{r}
+table(as.numeric(df$Months.from.diagnosis.to.treatment))
+ggplot(df, aes(x=Months.diag.to.treat)) +
+  geom_bar(aes(fill=Months.diag.to.treat))
+```
+
+Just like the Surg.Rad.Seq variable, almost all of the patients recieved treatment within 1 month of their diagnosis.
+
+Thus, the only way for the variable to be of any use is to make it binary, where one category is treatment within a month, and the other is one month or more.
+
+<br/>
+
+## Chase
+```{r}
+unique(df$CS_tumor_size)
+summary(df$CS_tumor_size, na.rm = TRUE)
+sd(df$CS_tumor_size, na.rm = TRUE)
+```
+
+```{r}
+ggplot(data = df, aes(x = CS_tumor_size))+
+  geom_histogram(fill="blue",color="white")+
+  labs(x='Tumor Size', y='Frequency', title = 'Tumor Size Histogram')
+```
+
+## Frankie
+```{r}
+#Numerical variable of nodes examined
+summary(df$nodes_examined_num)
+
+#Categorical varailable for nodes examined
+table(df$nodes_examined_cat)
+```
+
+```{r}
+#positive nodes numerical variable
+summary(df$positive_nodes_num)
+
+#categorical nodes numerical variable
+table(df$positive_nodes_cat)
+```
+
+<br/>
+
+## Saul
+
+```{r}
+# Checking distributions for variables
+ggplot(df) +
+  geom_histogram(aes(x = age))
+```
+
+<br/>
+```{r}
+ggplot(df) +
+  geom_bar(aes(x = race))
+```
+
+The vast majority of individuals with a tumor in their testis are white. 
+We checked the overall demographics of the seer data and found it was primarily white. 
+Because we do not have access to the counties in which the individuals reported from, it is difficult to gauge whether this is an issue or not.
+
+<br/>
+
+```{r}
+ggplot(df) +
+  geom_histogram(aes(x = survival.months))
+```
+
+<br/>
+
+```{r}
+ggplot(df, aes(x = marital.status.at.diagnosis, fill = marital.status.at.diagnosis)) +
+  geom_bar() +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        legend.text = element_text(size = 7))
+```
+
+Most patients were either married, or single (never married)
+
+<br/>
+
+```{r}
+ggplot(df) +
+  geom_bar(aes(x = situ.malignant.tumors))
+```
+Changed to binary (One tumor or More than one tumor)
+
+
+```{r}
+ggplot(df, aes(x = tm.3.1998.2003, fill = tm.3.1998.2003)) +
+  geom_bar() +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        legend.text = element_text(size = 7))
+```
+
+Tons of 'NA' values in tumor marker variables, probably in part do them not spanning all years.
+
+
+
+

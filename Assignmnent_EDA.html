@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Saul, Jhet, Frankie, and Chase">
+
+<title>Testicular Cancer EDA</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Assignmnent_EDA_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Assignmnent_EDA_files/libs/quarto-html/quarto.js"></script>
+<script src="Assignmnent_EDA_files/libs/quarto-html/popper.min.js"></script>
+<script src="Assignmnent_EDA_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Assignmnent_EDA_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Assignmnent_EDA_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Assignmnent_EDA_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Assignmnent_EDA_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Assignmnent_EDA_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Assignmnent_EDA_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Testicular Cancer EDA</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Saul, Jhet, Frankie, and Chase </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="research-questions" class="level1">
+<h1>Research Questions:</h1>
+<ul>
+<li>Github Repo: <a href="https://github.com/Smoorad99/485-TT" class="uri">https://github.com/Smoorad99/485-TT</a></li>
+</ul>
+<p>The questions we aim to solve with our data are the following:</p>
+<ul>
+<li><p>How does race affect survival rate/months survived for testi cancer?</p>
+<ul>
+<li>Exploring the role race plays in testicular cancer survival rates could help us address disparities between different races. If we find that survival rate of testicular cancer is impacted by race, it would push us to explore why this may be. For example, it may indicate inequality in healthcare received by different races.</li>
+</ul></li>
+<li><p>How does survival rate/months change based on treatment options for testi cancer?</p>
+<ul>
+<li>Exploring the relationship between survival rate/months and treatment method helps us understand which treatment methods are most effective. Investigating the quality of life patients experience while undergoing different treatments may also help us better understand the effectiveness of each treatment.</li>
+</ul></li>
+<li><p>Has the survival rate of testi cancer increased/decreased over time?&nbsp;</p>
+<ul>
+<li>Knowing the direction in which the survival rate moves allows us to question why it moves in said direction. If the survival rate has increased over time, we may ask: Has better medicine/treatment options led to this increase in survival rate?</li>
+</ul></li>
+</ul>
+</section>
+<section id="data-management" class="level1">
+<h1>Data Management</h1>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"C:/data/testis.csv"</span>) <span class="co"># This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>df[df <span class="sc">==</span> <span class="st">"Blank(s)"</span>] <span class="ot">&lt;-</span> <span class="cn">NA</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Jhet's DM</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sex =</span> <span class="fu">as.factor</span>(Sex),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Scope.Reg.LN.Sur =</span> <span class="fu">as.factor</span>(RX.Summ..Scope.Reg.LN.Sur..<span class="dv">2003</span>..),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Surg.Oth.Reg.Dis =</span> <span class="fu">as.factor</span>(RX.Summ..Surg.Oth.Reg.Dis..<span class="dv">2003</span>..),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Surg.Rad.Seq =</span> <span class="fu">as.factor</span>(<span class="fu">ifelse</span>(RX.Summ..Surg.Rad.Seq <span class="sc">==</span> <span class="st">"No radiation and/or cancer-directed surgery"</span>, <span class="st">"None"</span>, <span class="st">"Surg and or rad"</span>)),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Systemic.Sur.Seq =</span> <span class="fu">as.factor</span>(RX.Summ..Systemic.Sur.Seq..<span class="dv">2007</span>..),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">Months.diag.to.treat =</span> <span class="fu">ifelse</span>(<span class="fu">as.numeric</span>(Months.from.diagnosis.to.treatment) <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"&lt;1"</span>, <span class="st">"1+"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="dv">3</span><span class="sc">:</span><span class="dv">12</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Chase's DM</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">tumor_size =</span> <span class="fu">as.numeric</span>(<span class="st">"CS Tumor Size/Ext Eval (2004-2015)"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Frakie's DM</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">select</span>(df, <span class="sc">-</span><span class="fu">c</span>(<span class="st">'Number.of.Examined.Pelvic.Nodes.Recode..2010..'</span><span class="sc">:</span><span class="st">'Lymph.vascular.Invasion..2004..varying.by.schema.'</span>))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(df)[<span class="fu">names</span>(df) <span class="sc">==</span> <span class="st">"CS.tumor.size..2004.2015."</span>] <span class="ot">&lt;-</span> <span class="st">"CS_tumor_size"</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(df)[<span class="fu">names</span>(df) <span class="sc">==</span> <span class="st">"Regional.nodes.examined..1988.."</span>] <span class="ot">&lt;-</span> <span class="st">"Regional_node_examined"</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(df)[<span class="fu">names</span>(df) <span class="sc">==</span> <span class="st">"Regional.nodes.positive..1988.."</span>] <span class="ot">&lt;-</span> <span class="st">"Regional_positive_node"</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(df)[<span class="fu">names</span>(df) <span class="sc">==</span> <span class="st">"CS.lymph.nodes..2004.2015."</span>] <span class="ot">&lt;-</span> <span class="st">"CS_lymph_node"</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(df)[<span class="fu">names</span>(df) <span class="sc">==</span> <span class="st">"CS.mets.at.dx..2004.2015."</span>] <span class="ot">&lt;-</span> <span class="st">"CS_mets_dx"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>CS_tumor_size <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">as.character</span>(df<span class="sc">$</span>CS_tumor_size))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the new variable 'tumor_size_mod' based on the conditions</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>tumor_size_mod <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(df<span class="sc">$</span>CS_tumor_size <span class="sc">==</span> <span class="dv">000</span>, <span class="dv">0</span>, <span class="co"># No mass/tumor</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">ifelse</span>(df<span class="sc">$</span>CS_tumor_size <span class="sc">&gt;=</span> <span class="dv">001</span> <span class="sc">&amp;</span> df<span class="sc">$</span>CS_tumor_size <span class="sc">&lt;=</span> <span class="dv">988</span>, df<span class="sc">$</span>CS_tumor_size, <span class="co"># Exact size in mm</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">ifelse</span>(df<span class="sc">$</span>CS_tumor_size <span class="sc">==</span> <span class="dv">989</span>, <span class="dv">989</span>, <span class="co"># 989 mm or larger</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">ifelse</span>(df<span class="sc">$</span>CS_tumor_size <span class="sc">==</span> <span class="dv">990</span>, <span class="fl">0.5</span>, <span class="co"># Microscopic, no given size, assume 0.5mm as a placeholder</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">ifelse</span>(df<span class="sc">$</span>CS_tumor_size <span class="sc">==</span> <span class="dv">991</span>, <span class="dv">5</span>, <span class="co"># Less than 1 cm, use 5mm as the midpoint</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">ifelse</span>(df<span class="sc">$</span>CS_tumor_size <span class="sc">==</span> <span class="dv">992</span>, <span class="dv">15</span>, <span class="co"># Less than 2 cm, use 15mm as the midpoint</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">ifelse</span>(df<span class="sc">$</span>CS_tumor_size <span class="sc">==</span> <span class="dv">993</span>, <span class="dv">25</span>, <span class="co"># Less than 3 cm, use 25mm as the midpoint</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">ifelse</span>(df<span class="sc">$</span>CS_tumor_size <span class="sc">==</span> <span class="dv">994</span>, <span class="dv">35</span>, <span class="co"># Less than 4 cm, use 35mm as the midpoint</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">ifelse</span>(df<span class="sc">$</span>CS_tumor_size <span class="sc">==</span> <span class="dv">995</span>, <span class="dv">45</span>, <span class="co"># Less than 5 cm, use 45mm as the midpoint</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">ifelse</span>(df<span class="sc">$</span>CS_tumor_size <span class="sc">&gt;=</span> <span class="dv">996</span> <span class="sc">&amp;</span> df<span class="sc">$</span>CS_tumor_size <span class="sc">&lt;=</span> <span class="dv">998</span>, <span class="cn">NA</span>, <span class="co"># Site-specific codes, handle as NA or a specific rule if applicable</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">ifelse</span>(df<span class="sc">$</span>CS_tumor_size <span class="sc">==</span> <span class="dv">999</span> <span class="sc">|</span> df<span class="sc">$</span>CS_tumor_size <span class="sc">==</span> <span class="dv">888</span> <span class="sc">|</span> df<span class="sc">$</span>CS_tumor_size <span class="sc">==</span> <span class="dv">1022</span>, <span class="cn">NA</span>, <span class="co"># Unknown, Not applicable, or Blank, handle as NA</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>                                <span class="cn">NA</span>))))))))))) <span class="co"># Default case to catch any unhandled values</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#modifying regional nodes examined </span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Create a new numeric variable for the exact number of nodes examined</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>nodes_examined_num <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_node_examined <span class="sc">&gt;=</span> <span class="dv">01</span> <span class="sc">&amp;</span> df<span class="sc">$</span>Regional_node_examined <span class="sc">&lt;=</span> <span class="dv">89</span>, df<span class="sc">$</span>Regional_node_examined,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_node_examined <span class="sc">==</span> <span class="dv">90</span>, <span class="dv">90</span>, <span class="cn">NA</span>))</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Create a new categorical variable for special conditions</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>nodes_examined_cat <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_node_examined <span class="sc">==</span> <span class="dv">00</span>, <span class="st">"No nodes examined"</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_node_examined <span class="sc">==</span> <span class="dv">95</span>, <span class="st">"Aspiration performed"</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_node_examined <span class="sc">==</span> <span class="dv">96</span>, <span class="st">"Sampling, number unknown"</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_node_examined <span class="sc">==</span> <span class="dv">97</span>, <span class="st">"Dissection, number unknown"</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_node_examined <span class="sc">==</span> <span class="dv">98</span>, <span class="st">"Removed, number unknown"</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_node_examined <span class="sc">==</span> <span class="dv">99</span>, <span class="st">"Unknown"</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_node_examined <span class="sc">==</span> <span class="dv">126</span>, <span class="st">"Blank"</span>, <span class="st">"Exact number"</span>)))))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#modifying regional nodes positive</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Numeric variable for the exact number of positive nodes</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>positive_nodes_num <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_positive_node <span class="sc">&gt;=</span> <span class="dv">1</span> <span class="sc">&amp;</span> df<span class="sc">$</span>Regional_positive_node <span class="sc">&lt;=</span> <span class="dv">89</span>, df<span class="sc">$</span>Regional_positive_node,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_positive_node <span class="sc">==</span> <span class="dv">90</span>, <span class="dv">90</span>, <span class="cn">NA</span>))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Categorical variable for special conditions</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>positive_nodes_cat <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_positive_node <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"All nodes negative"</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_positive_node <span class="sc">==</span> <span class="dv">95</span>, <span class="st">"Positive aspiration performed"</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_positive_node <span class="sc">==</span> <span class="dv">97</span>, <span class="st">"Positive, number unspecified"</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_positive_node <span class="sc">==</span> <span class="dv">98</span>, <span class="st">"No nodes examined"</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_positive_node <span class="sc">==</span> <span class="dv">99</span>, <span class="st">"Unknown"</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>                                    <span class="fu">ifelse</span>(df<span class="sc">$</span>Regional_positive_node <span class="sc">==</span> <span class="dv">126</span>, <span class="st">"Blank"</span>, <span class="cn">NA</span>)))))) <span class="co"># Using NA for 'Exact number positive' to keep only special conditions</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Optional: Convert the categorical variable into a factor for easier handling in certain types of analyses</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>positive_nodes_cat <span class="ot">&lt;-</span> <span class="fu">factor</span>(df<span class="sc">$</span>positive_nodes_cat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Saul's DM</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span><span class="st">`</span><span class="at">Age.recode.with.single.ages.and.90.</span><span class="st">`</span> <span class="ot">&lt;-</span> <span class="fu">gsub</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">" years"</span>,<span class="st">""</span>,df<span class="sc">$</span><span class="st">`</span><span class="at">Age.recode.with.single.ages.and.90.</span><span class="st">`</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">age =</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">Age.recode.with.single.ages.and.90.</span><span class="st">`</span>),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">race =</span> <span class="st">`</span><span class="at">Race.recode..W..B..AI..API.</span><span class="st">`</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">survival.months =</span> <span class="fu">as.numeric</span>(Survival.months),</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">marital.status.at.diagnosis =</span> Marital.status.at.diagnosis,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">situ.malignant.tumors =</span> <span class="fu">as.numeric</span>(<span class="st">`</span><span class="at">Total.number.of.in.situ.malignant.tumors.for.patient</span><span class="st">`</span>),</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">tm.3.1998.2003 =</span> <span class="st">`</span><span class="at">Tumor.marker.3..1998.2003.</span><span class="st">`</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Other recodes</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">situ.malignant.tumors =</span> <span class="fu">ifelse</span>(situ.malignant.tumors <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"One tumor"</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">ifelse</span>(situ.malignant.tumors <span class="sc">&gt;</span> <span class="dv">1</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"More than one tumor"</span>, <span class="cn">NA</span>)),</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">tm.3.1998.2003 =</span> <span class="fu">recode</span>(tm.<span class="dv">3</span>.<span class="fl">1998.2003</span>, </span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"0"</span> <span class="ot">=</span> <span class="st">"None Done (SX)"</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"2"</span> <span class="ot">=</span> <span class="st">"Within normal limits (S0)"</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"4"</span> <span class="ot">=</span> <span class="st">"Range 1 (S1) &lt;1.5 x upper limit of normal for LDH assay"</span>,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"5"</span> <span class="ot">=</span> <span class="st">"Range 2 (S2) 1.5 – 10 x upper limit of normal for LDH assay"</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"6"</span> <span class="ot">=</span> <span class="st">"Range 3 (S3) &gt;10 x upper limit of normal for LDH assay"</span>,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"8"</span> <span class="ot">=</span> <span class="st">"Ordered, results not in chart"</span>,</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"9"</span> <span class="ot">=</span> <span class="st">"Unknown or no information"</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>                          <span class="st">"14"</span> <span class="ot">=</span> <span class="st">" Blank"</span>)</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">select</span>(X, age,</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>                    race, survival.months,</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>                    marital.status.at.diagnosis, </span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>                    situ.malignant.tumors,</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>                    tm.<span class="dv">3</span>.<span class="fl">1998.2003</span>,</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>                    Sex,</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>                    Scope.Reg.LN.Sur,</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>                    Surg.Oth.Reg.Dis,</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>                    Surg.Rad.Seq,</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>                    Systemic.Sur.Seq,</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>                    Months.diag.to.treat,CS_tumor_size,</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>                    Regional_node_examined,</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>                    Regional_positive_node,</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>                    CS_lymph_node,</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>                    CS_mets_dx,</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>                    tumor_size_mod,</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>                    nodes_examined_num,</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>                    Regional_node_examined,</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>                    nodes_examined_cat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="explorartory-data-analysis" class="level1">
+<h1>Explorartory Data Analysis</h1>
+<section id="jhet" class="level2">
+<h2 class="anchored" data-anchor-id="jhet">Jhet</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       X              age            race           survival.months
+ Min.   :    1   Min.   : 0.00   Length:50522       Min.   :  0.0  
+ 1st Qu.:12631   1st Qu.:26.00   Class :character   1st Qu.: 37.0  
+ Median :25262   Median :33.00   Mode  :character   Median : 95.0  
+ Mean   :25262   Mean   :36.01                      Mean   :104.3  
+ 3rd Qu.:37892   3rd Qu.:43.00                      3rd Qu.:166.0  
+ Max.   :50522   Max.   :89.00                      Max.   :251.0  
+                 NA's   :69                         NA's   :70     
+ marital.status.at.diagnosis situ.malignant.tumors tm.3.1998.2003    
+ Length:50522                Length:50522          Length:50522      
+ Class :character            Class :character      Class :character  
+ Mode  :character            Mode  :character      Mode  :character  
+                                                                     
+                                                                     
+                                                                     
+                                                                     
+   Sex                                                Scope.Reg.LN.Sur
+ Male:50522   None                                            :38710  
+              4 or more regional lymph nodes removed          : 3078  
+              Unknown or not applicable                       :  801  
+              1 to 3 regional lymph nodes removed             :  593  
+              Biopsy or aspiration of regional lymph node, NOS:  495  
+              (Other)                                         :  406  
+              NA's                                            : 6439  
+                                                Surg.Oth.Reg.Dis
+ None; diagnosed at autopsy                             :42730  
+ Non-primary surgical procedure to other regional sites :  377  
+ Non-primary surgical procedure to distant site         :  348  
+ Non-primary surgical procedure to distant lymph node(s):  206  
+ Non-primary surgical procedure performed               :  182  
+ (Other)                                                :  240  
+ NA's                                                   : 6439  
+          Surg.Rad.Seq                                         Systemic.Sur.Seq
+ None           :41212   No systemic therapy and/or surgical procedures:22145  
+ Surg and or rad: 9310   Systemic therapy after surgery                :12038  
+                         Systemic therapy before surgery               :  557  
+                         Systemic therapy both before and after surgery:  309  
+                         Surgery both before and after systemic therapy:  167  
+                         (Other)                                       :   42  
+                         NA's                                          :15264  
+ Months.diag.to.treat CS_tumor_size   Regional_node_examined
+ Length:50522         Min.   :  0.0   Min.   : 0.000        
+ Class :character     1st Qu.: 25.0   1st Qu.: 0.000        
+ Mode  :character     Median : 43.0   Median : 0.000        
+                      Mean   :154.9   Mean   : 9.834        
+                      3rd Qu.: 70.0   3rd Qu.: 0.000        
+                      Max.   :999.0   Max.   :99.000        
+                      NA's   :21888                         
+ Regional_positive_node CS_lymph_node       CS_mets_dx        tumor_size_mod 
+ Min.   : 0.0           Length:50522       Length:50522       Min.   :  0.0  
+ 1st Qu.:98.0           Class :character   Class :character   1st Qu.: 25.0  
+ Median :98.0           Mode  :character   Mode  :character   Median : 40.0  
+ Mean   :88.8                                                 Mean   : 81.8  
+ 3rd Qu.:98.0                                                 3rd Qu.: 60.0  
+ Max.   :99.0                                                 Max.   :989.0  
+                                                              NA's   :24093  
+ nodes_examined_num nodes_examined_cat
+ Min.   : 1.00      Length:50522      
+ 1st Qu.: 6.00      Class :character  
+ Median :17.00      Mode  :character  
+ Mean   :21.07                        
+ 3rd Qu.:30.00                        
+ Max.   :90.00                        
+ NA's   :46157                        </code></pre>
+</div>
+</div>
+<p>Because many of the variables are categorical now, statistics such as mean, median, and standard deviation are not applicable.</p>
+<p>Instead, we can see the frequency distributions above in count form, as well as visualized below.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#50522 rows</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x=</span>Scope.Reg.LN.Sur)) <span class="sc">+</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">fill=</span>Scope.Reg.LN.Sur)) <span class="sc">+</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text=</span><span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">6</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Assignmnent_EDA_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>This variable contains data relating to the scope of surgery done to regional lymph nodes. Most of the cases are “none”, meaning no surgery was done. Besides NA, the next highest number of observations is in the 4+ lymph nodes removed category, followed by 1-3.</p>
+<p>From this we can discern that removal of lymph nodes is uncommon, but becomes more necessary the more positive nodes there are.</p>
+<p><br></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x=</span>Surg.Oth.Reg.Dis)) <span class="sc">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">fill=</span>Surg.Oth.Reg.Dis)) <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text=</span><span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">6</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Assignmnent_EDA_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Surg.Oth.Reg.Dis stands for “surgery to other distant regions”, and over ~42,000 out of 50,000 observations are in the “none/diagnosed at autopsy” category.</p>
+<p>Another 6000 of the remaining 8000 are NA’s, meaning the variable contains little meaningful data for our investigations.</p>
+<p><br></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>RX.Summ..Surg.Rad.Seq)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt; table of extent 0 &gt;</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x=</span>Surg.Rad.Seq)) <span class="sc">+</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">fill=</span>Surg.Rad.Seq)) <span class="sc">+</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text=</span><span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">6</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Assignmnent_EDA_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The categories in this variable originally contained the order of surgery and or radiation. However, ~40,000 were again contained in the No surgery category.</p>
+<p>Thus, the variable is collapsed into just two levels, one in which no surgery or radiation was used, and another where one or both were used.</p>
+<p><br></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x=</span>Systemic.Sur.Seq)) <span class="sc">+</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">fill=</span>Systemic.Sur.Seq)) <span class="sc">+</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x=</span><span class="fu">element_blank</span>(),</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text=</span><span class="fu">element_text</span>(<span class="at">size=</span><span class="dv">6</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Assignmnent_EDA_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Similar to the previous variable, this one contains data involving the sequence of systemic surgery and therapy. Most of the observations are in the none level, another large portion are patients that got systemic therapy after surgery, and another large chunk is NA’s.</p>
+<p>The presence of two substantial categories makes this a useful variable for our treatment related data science question.</p>
+<p><br></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="fu">as.numeric</span>(df<span class="sc">$</span>Months.from.diagnosis.to.treatment))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt; table of extent 0 &gt;</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x=</span>Months.diag.to.treat)) <span class="sc">+</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">fill=</span>Months.diag.to.treat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Assignmnent_EDA_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Just like the Surg.Rad.Seq variable, almost all of the patients recieved treatment within 1 month of their diagnosis.</p>
+<p>Thus, the only way for the variable to be of any use is to make it binary, where one category is treatment within a month, and the other is one month or more.</p>
+<p><br></p>
+</section>
+<section id="chase" class="level2">
+<h2 class="anchored" data-anchor-id="chase">Chase</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(df<span class="sc">$</span>CS_tumor_size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1]  NA  25  15  20  70 988  65  90   9  27  66  45  39 999  75  30 160  60
+ [19]  35  42  18  80  12  92  23  50  55  28  43  85  26  10  40  52 100   4
+ [37]  67  54   0  21  22  16  11   8  34  13  47  38 110  37  68  48  36 104
+ [55]  56  24  32  17  19   7  62  58  57   6  63  73  78 989   2 130  72  44
+ [73] 120  46  53 170  94  31  49  95   5 118 128 145  61  33  29 115  76  41
+ [91]  81 150  59 109  89  84  83  69  77 135 140 670  14 520  64  51 105 125
+[109] 102 195 123   3 161  71 280  74  82 112  88  87 993  93  98 992 994 180
+[127]  96   1  97 124 226 650  86 250 420 152 205 320  79 114 108 990 103 260
+[145] 158 107 210 119 239  91 132  99 270 146 111 920 129 122 450 121 200 550
+[163] 888 155 113 117 700 137 101 151 220 165 116 133 190 127 400 162 181 141
+[181] 800 185 188 215 390 189 950 230 470 177 995 580 620 138 350 142 157 991
+[199] 106 255 126 271 139 263 134 225 172 148 202 174 690 411 156 168 164 175
+[217] 201 131 780 600 720 187 154 204 193 300 560</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df<span class="sc">$</span>CS_tumor_size, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    0.0    25.0    43.0   154.9    70.0   999.0   21888 </code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(df<span class="sc">$</span>CS_tumor_size, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 305.4416</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> df, <span class="fu">aes</span>(<span class="at">x =</span> CS_tumor_size))<span class="sc">+</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">fill=</span><span class="st">"blue"</span>,<span class="at">color=</span><span class="st">"white"</span>)<span class="sc">+</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">'Tumor Size'</span>, <span class="at">y=</span><span class="st">'Frequency'</span>, <span class="at">title =</span> <span class="st">'Tumor Size Histogram'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Assignmnent_EDA_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="frankie" class="level2">
+<h2 class="anchored" data-anchor-id="frankie">Frankie</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Numerical variable of nodes examined</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df<span class="sc">$</span>nodes_examined_num)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+   1.00    6.00   17.00   21.07   30.00   90.00   46157 </code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Categorical varailable for nodes examined</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>nodes_examined_cat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+      Aspiration performed Dissection, number unknown 
+                       579                        326 
+              Exact number          No nodes examined 
+                      4365                      42032 
+   Removed, number unknown   Sampling, number unknown 
+                       508                         17 
+                   Unknown 
+                      2695 </code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co">#positive nodes numerical variable</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(df<span class="sc">$</span>positive_nodes_num)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Length  Class   Mode 
+     0   NULL   NULL </code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co">#categorical nodes numerical variable</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(df<span class="sc">$</span>positive_nodes_cat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt; table of extent 0 &gt;</code></pre>
+</div>
+</div>
+<p><br></p>
+</section>
+<section id="saul" class="level2">
+<h2 class="anchored" data-anchor-id="saul">Saul</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Checking distributions for variables</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df) <span class="sc">+</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> age))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Assignmnent_EDA_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><br></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df) <span class="sc">+</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">x =</span> race))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Assignmnent_EDA_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The vast majority of individuals with a tumor in their testis are white. We checked the overall demographics of the seer data and found it was primarily white. Because we do not have access to the counties in which the individuals reported from, it is difficult to gauge whether this is an issue or not.</p>
+<p><br></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df) <span class="sc">+</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> survival.months))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Assignmnent_EDA_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p><br></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> marital.status.at.diagnosis, <span class="at">fill =</span> marital.status.at.diagnosis)) <span class="sc">+</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">7</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Assignmnent_EDA_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Most patients were either married, or single (never married)</p>
+<p><br></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df) <span class="sc">+</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="fu">aes</span>(<span class="at">x =</span> situ.malignant.tumors))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Assignmnent_EDA_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Changed to binary (One tumor or More than one tumor)</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> tm.<span class="dv">3</span>.<span class="fl">1998.2003</span>, <span class="at">fill =</span> tm.<span class="dv">3</span>.<span class="fl">1998.2003</span>)) <span class="sc">+</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">7</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="Assignmnent_EDA_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Tons of ‘NA’ values in tumor marker variables, probably in part do them not spanning all years.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
