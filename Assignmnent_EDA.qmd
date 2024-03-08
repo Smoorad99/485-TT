@@ -41,7 +41,7 @@ The questions we aim to solve with our data are the following:
 ```{r}
 library(dplyr)
 library(ggplot2)
-df <- read.csv("C:/data/testi.csv") # This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.
+df <- read.csv("C:/Users/cjhet/Documents/testis.csv") # This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.
 df[df == "Blank(s)"] <- NA
 ```
 
@@ -191,19 +191,20 @@ df <- df %>% select(id, age,
 ```
 
 
-# Explorartory Data Analysis
+# Exploratory Data Analysis
 
-## Jhet
 ```{r}
 summary(df)
 ```
+## Jhet
 
-Because many of the variables are categorical now, statistics such as mean, median, and standard deviation are not applicable.
+After cleaning and managing the data, all of the variables I am in charge of analyzing are now categorical, meaning statistics such as mean, standard deviation and median are not very useful.
 
 Instead, we can see the frequency distributions above in count form, as well as visualized below.
 
 ```{r}
 #50522 rows
+table(df$Scope.Reg.LN.Sur)
 ggplot(df, aes(x=Scope.Reg.LN.Sur)) +
   geom_bar(aes(fill=Scope.Reg.LN.Sur)) +
   theme(axis.text.x=element_blank(),
@@ -218,6 +219,7 @@ From this we can discern that removal of lymph nodes is uncommon, but becomes mo
 <br/>
 
 ```{r}
+table(df$Surg.Oth.Reg.Dis)
 ggplot(df, aes(x=Surg.Oth.Reg.Dis)) +
   geom_bar(aes(fill=Surg.Oth.Reg.Dis)) +
   theme(axis.text.x=element_blank(),
@@ -231,20 +233,21 @@ Another 6000 of the remaining 8000 are NA's, meaning the variable contains littl
 <br/>
 
 ```{r}
-table(df$RX.Summ..Surg.Rad.Seq)
+table(df$Surg.Rad.Seq)
 ggplot(df, aes(x=Surg.Rad.Seq)) +
   geom_bar(aes(fill=Surg.Rad.Seq)) +
   theme(axis.text.x=element_blank(),
         legend.text=element_text(size=6))
 ```
 
-The categories in this variable originally contained the order of surgery and or radiation. However, ~40,000 were again contained in the No surgery category.
+The categories in this variable originally contained the order of surgery and or radiation. However, ~40,000 were again contained in the "no surgery" category.
 
 Thus, the variable is collapsed into just two levels, one in which no surgery or radiation was used, and another where one or both were used.
 
 <br/>
 
 ```{r}
+table(df$Systemic.Sur.Seq)
 ggplot(df, aes(x=Systemic.Sur.Seq)) +
   geom_bar(aes(fill=Systemic.Sur.Seq)) +
   theme(axis.text.x=element_blank(),
@@ -258,12 +261,12 @@ The presence of two substantial categories makes this a useful variable for our 
 <br/>
 
 ```{r}
-table(as.numeric(df$Months.from.diagnosis.to.treatment))
+table(df$Months.diag.to.treat)
 ggplot(df, aes(x=Months.diag.to.treat)) +
   geom_bar(aes(fill=Months.diag.to.treat))
 ```
 
-Just like the Surg.Rad.Seq variable, almost all of the patients recieved treatment within 1 month of their diagnosis.
+Just like the Surg.Rad.Seq variable, almost all of the patients received treatment within 1 month of their diagnosis.
 
 Thus, the only way for the variable to be of any use is to make it binary, where one category is treatment within a month, and the other is one month or more.
 
