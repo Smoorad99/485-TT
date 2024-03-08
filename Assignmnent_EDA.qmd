@@ -41,7 +41,7 @@ The questions we aim to solve with our data are the following:
 ```{r}
 library(dplyr)
 library(ggplot2)
-df <- read.csv("C:/data/testis.csv") # This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.
+df <- read.csv("C:/data/testi.csv") # This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.
 df[df == "Blank(s)"] <- NA
 ```
 
@@ -146,7 +146,11 @@ df <- df %>%
     survival.months = as.numeric(Survival.months),
     marital.status.at.diagnosis = Marital.status.at.diagnosis,
     situ.malignant.tumors = as.numeric(`Total.number.of.in.situ.malignant.tumors.for.patient`),
-    tm.3.1998.2003 = `Tumor.marker.3..1998.2003.`)
+    tm.3.1998.2003 = `Tumor.marker.3..1998.2003.`,
+    id = Patient.ID,
+    death.site = COD.to.site.recode.ICD.O.3.2023.Revision.Expanded..1999..,
+    cause.specific = SEER.cause.specific.death.classification,
+    cause.other = SEER.other.cause.of.death.classification)
 
 # Other recodes
 df <- df %>% mutate(
@@ -164,8 +168,9 @@ df <- df %>% mutate(
                           "14" = " Blank")
 )
 
-df <- df %>% select(X, age,
-                    race, survival.months,
+df <- df %>% select(id, age,
+                    race, death.site, cause.specific,
+                    cause.other, survival.months,
                     marital.status.at.diagnosis, 
                     situ.malignant.tumors,
                     tm.3.1998.2003,
