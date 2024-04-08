@@ -29,7 +29,7 @@ The questions we aim to solve with our data are the following:
         us better understand the effectiveness of each treatment.
 
 -   Has the survival rate of testi cancer increased/decreased over
-    time? 
+    time?
 
     -   Knowing the direction in which the survival rate moves allows us
         to question why it moves in said direction. If the survival rate
@@ -41,6 +41,7 @@ The questions we aim to solve with our data are the following:
 ```{r}
 library(dplyr)
 library(ggplot2)
+library(survminer)
 df <- read.csv("C:/data/testi.csv") # This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.
 df[df == "Blank(s)"] <- NA
 ```
@@ -188,6 +189,27 @@ df <- df %>% select(id, age,
                     nodes_examined_num,
                     Regional_node_examined,
                     nodes_examined_cat)
+```
+
+
+```{r}
+df$testi_death <- ifelse(df$death.site == "Testis", 1, 0)
+df$SurvObj <- with(df, Surv(survival.months, testi_death == 1))
+```
+
+```{r}
+km <- survfit(SurvObj ~ 1, data = df, conf.type = "log-log")
+
+km.trt <- survfit(SurvObj ~ Surg.Rad.Seq, data = df, conf.type = "log-log")
+
+ggs <- ggsurvplot(
+  fit = survfit(Surv(survival.months, testi_death) ~ Surg.Rad.Seq, data = df), 
+  xlab = "Months", 
+  ylab = "Overall survival probability") 
+
+ggs$plot <- ggs$plot + ylim(c(0.9, 1))
+
+ggs
 ```
 
 
