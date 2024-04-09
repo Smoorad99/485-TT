@@ -41,12 +41,9 @@ The questions we aim to solve with our data are the following:
 ```{r}
 library(dplyr)
 library(ggplot2)
-<<<<<<< HEAD
 library(survminer)
-df <- read.csv("C:/data/testi.csv") # This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.
-=======
+library(survival)
 df <- read.csv("C:/Users/cjhet/Documents/testis.csv") # This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.
->>>>>>> 3aa0fbfbc7ccdbc573289b51caa7e69ef4e4faef
 df[df == "Blank(s)"] <- NA
 ```
 
@@ -196,7 +193,6 @@ df <- df %>% select(id, age,
 ```
 
 
-<<<<<<< HEAD
 ```{r}
 df$testi_death <- ifelse(df$death.site == "Testis", 1, 0)
 df$SurvObj <- with(df, Surv(survival.months, testi_death == 1))
@@ -205,10 +201,18 @@ df$SurvObj <- with(df, Surv(survival.months, testi_death == 1))
 ```{r}
 km <- survfit(SurvObj ~ 1, data = df, conf.type = "log-log")
 
-km.trt <- survfit(SurvObj ~ Surg.Rad.Seq, data = df, conf.type = "log-log")
+km.trt <- survfit(SurvObj ~ race, data = df, conf.type = "log-log")
+km.race <- survfit(SurvObj ~ race, data = df, conf.type = "log-log")
 
 ggs <- ggsurvplot(
-  fit = survfit(Surv(survival.months, testi_death) ~ Surg.Rad.Seq, data = df), 
+  fit = survfit(Surv(survival.months, testi_death) ~ race, data = df), 
+  xlab = "Months", 
+  ylab = "Overall survival probability") 
+ggs$plot <- ggs$plot + ylim(c(0.9, 1))
+ggs
+
+ggs <- ggsurvplot(
+  fit = survfit(Surv(survival.months, testi_death) ~ marital.status.at.diagnosis, data = df), 
   xlab = "Months", 
   ylab = "Overall survival probability") 
 
@@ -216,12 +220,12 @@ ggs$plot <- ggs$plot + ylim(c(0.9, 1))
 
 ggs
 ```
+```{r}
+#should potentially remove some of these
+coxph(Surv(survival.months, testi_death) ~ race + Scope.Reg.LN.Sur + Surg.Oth.Reg.Dis + Surg.Rad.Seq + Months.diag.to.treat + marital.status.at.diagnosis, data = df) %>% gtsummary::tbl_regression(exp = TRUE) 
+```
 
-
-# Explorartory Data Analysis
-=======
 # Exploratory Data Analysis
->>>>>>> 3aa0fbfbc7ccdbc573289b51caa7e69ef4e4faef
 
 ```{r}
 summary(df)
