@@ -19,23 +19,14 @@ The questions we aim to solve with our data are the following:
         example, it may indicate inequality in healthcare received by
         different races.
 
--   How does survival rate/months change based on treatment options for
-    testi cancer?
+-   How does survival rate/months change based on access to treatment?
 
-    -   Exploring the relationship between survival rate/months and
-        treatment method helps us understand which treatment methods are
-        most effective. Investigating the quality of life patients
+    -   Exploring the relationship between survival rate/months and time from diagnosis to treatment         helps us understand the effects of delaying treatment after diagnosis.
+        Investigating the quality of life patients
         experience while undergoing different treatments may also help
         us better understand the effectiveness of each treatment.
 
--   Has the survival rate of testi cancer increased/decreased over
-    time?
-
-    -   Knowing the direction in which the survival rate moves allows us
-        to question why it moves in said direction. If the survival rate
-        has increased over time, we may ask: Has better
-        medicine/treatment options led to this increase in survival
-        rate?
+-   How does the survival rate/months change based on the marital status of the patient?
 
 # Data Management
 ```{r}
@@ -214,6 +205,24 @@ ggs$plot <- ggs$plot + ylim(c(0.9, 1))
 
 ggs
 ```
+
+
+```{r}
+ggs <- ggsurvplot(
+  fit = survfit(Surv(survival.months, testi_death) ~ marital.status.at.diagnosis, data = df), 
+  xlab = "Months", 
+  ylab = "Overall survival probability") 
+
+ggs$plot <- ggs$plot + ylim(c(0.9, 1))
+
+ggs
+```
+
+
+```{r}
+coxph(Surv(survival.months, testi_death) ~ race + Surg.Rad.Seq + Months.diag.to.treat + marital.status.at.diagnosis, data = df) %>% gtsummary::tbl_regression(exp = TRUE)
+```
+
 
 
 # Explorartory Data Analysis
