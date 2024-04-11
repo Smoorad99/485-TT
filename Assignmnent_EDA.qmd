@@ -4,8 +4,13 @@ title: "Testicular Cancer EDA"
 format:
   pdf:
     warning: false
+editor: 
+  markdown: 
+    wrap: 72
 ---
+
 # Research Questions:
+
 -   Github Repo: <https://github.com/Smoorad99/485-TT>
 
 The questions we aim to solve with our data are the following:
@@ -21,25 +26,28 @@ The questions we aim to solve with our data are the following:
 
 -   How does survival rate/months change based on access to treatment?
 
-    -   Exploring the relationship between survival rate/months and time from diagnosis to treatment         helps us understand the effects of delaying treatment after diagnosis.
-        Investigating the quality of life patients
-        experience while undergoing different treatments may also help
-        us better understand the effectiveness of each treatment.
+    -   Exploring the relationship between survival rate/months and time
+        from diagnosis to treatment helps us understand the effects of
+        delaying treatment after diagnosis. Investigating the quality of
+        life patients experience while undergoing different treatments
+        may also help us better understand the effectiveness of each
+        treatment.
 
--   How does the survival rate/months change based on the marital status of the patient?
+-   How does the survival rate/months change based on the marital status
+    of the patient?
 
 # Data Management
+
 ```{r}
 library(dplyr)
 library(ggplot2)
 library(survminer)
 library(survival)
 
-df <- read.csv("C:/data/testi.csv") # This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.
+df <- read.csv("C:/Users/cjhet/Documents/testis.csv") # This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.
 
 df[df == "Blank(s)"] <- NA
 ```
-
 
 ```{r}
 # Jhet's DM
@@ -53,7 +61,6 @@ df <- df %>%
     Months.diag.to.treat = ifelse(as.numeric(Months.from.diagnosis.to.treatment) == 0, "<1", "1+")
 ) %>% select(-c(3:12))
 ```
-
 
 ```{r}
 #Chase's DM
@@ -71,7 +78,6 @@ names(df)[names(df) == "Regional.nodes.positive..1988.."] <- "Regional_positive_
 names(df)[names(df) == "CS.lymph.nodes..2004.2015."] <- "CS_lymph_node"
 names(df)[names(df) == "CS.mets.at.dx..2004.2015."] <- "CS_mets_dx"
 ```
-
 
 ```{r}
 df$CS_tumor_size <- as.numeric(as.character(df$CS_tumor_size))
@@ -129,7 +135,6 @@ df$positive_nodes_cat <- ifelse(df$Regional_positive_node == 0, "All nodes negat
 df$positive_nodes_cat <- factor(df$positive_nodes_cat)
 ```
 
-
 ```{r}
 #Saul's DM
 df$`Age.recode.with.single.ages.and.90.` <- gsub(
@@ -185,73 +190,20 @@ df <- df %>% select(id, age,
                     nodes_examined_cat)
 ```
 
-
-```{r}
-df$testi_death <- ifelse(df$death.site == "Testis", 1, 0)
-df$SurvObj <- with(df, Surv(survival.months, testi_death == 1))
-```
-
-```{r}
-km <- survfit(SurvObj ~ 1, data = df, conf.type = "log-log")
-
-km.trt <- survfit(SurvObj ~ Surg.Rad.Seq, data = df, conf.type = "log-log")
-
-ggs <- ggsurvplot(
-  fit = survfit(Surv(survival.months, testi_death) ~ Surg.Rad.Seq, data = df), 
-  xlab = "Months", 
-  ylab = "Overall survival probability") 
-
-ggs$plot <- ggs$plot + ylim(c(0.9, 1))
-
-ggs
-```
-
-
-```{r}
-ggs <- ggsurvplot(
-  fit = survfit(Surv(survival.months, testi_death) ~ marital.status.at.diagnosis, data = df), 
-  xlab = "Months", 
-  ylab = "Overall survival probability") 
-
-ggs$plot <- ggs$plot + ylim(c(0.9, 1))
-
-ggs
-```
-
-
-```{r}
-mod <- coxph(Surv(survival.months, testi_death) ~ race + Surg.Rad.Seq + Months.diag.to.treat + marital.status.at.diagnosis, data = df)
-# %>% gtsummary::tbl_regression(exp = TRUE)
-```
-
-
-### Checking Cox Proportional Hazards assumptions
-```{r}
-test.ph <- cox.zph(mod)
-```
-From the output above, the test is not statistically significant for the global test as well as each of the covariates. Therefore, we can assume the proportional hazards.
-
-```{r}
-ggcoxzph(test.ph)
-```
-No pattern with time (supports the use of proportional hazards)
-
-
-### Model Performance
-```{r}
-summary(mod)
-```
-
-# Explorartory Data Analysis
+# Exploratory Data Analysis
 
 ```{r}
 summary(df)
 ```
+
 ## Jhet
 
-After cleaning and managing the data, all of the variables I am in charge of analyzing are now categorical, meaning statistics such as mean, standard deviation and median are not very useful.
+After cleaning and managing the data, all of the variables I am in
+charge of analyzing are now categorical, meaning statistics such as
+mean, standard deviation and median are not very useful.
 
-Instead, we can see the frequency distributions above in count form, as well as visualized below.
+Instead, we can see the frequency distributions above in count form, as
+well as visualized below.
 
 ```{r}
 #50522 rows
@@ -262,10 +214,13 @@ ggplot(df, aes(x=Scope.Reg.LN.Sur)) +
         legend.text=element_text(size=6))
 ```
 
-This variable contains data relating to the scope of surgery done to regional lymph nodes. Most of the cases are "none", meaning no surgery was done.
-Besides NA, the next highest number of observations is in the 4+ lymph nodes removed category, followed by 1-3.
+This variable contains data relating to the scope of surgery done to
+regional lymph nodes. Most of the cases are "none", meaning no surgery
+was done. Besides NA, the next highest number of observations is in the
+4+ lymph nodes removed category, followed by 1-3.
 
-From this we can discern that removal of lymph nodes is uncommon, but becomes more necessary the more positive nodes there are.
+From this we can discern that removal of lymph nodes is uncommon, but
+becomes more necessary the more positive nodes there are.
 
 <br/>
 
@@ -277,9 +232,12 @@ ggplot(df, aes(x=Surg.Oth.Reg.Dis)) +
         legend.text=element_text(size=6))
 ```
 
-Surg.Oth.Reg.Dis stands for "surgery to other distant regions", and over ~42,000 out of 50,000 observations are in the "none/diagnosed at autopsy" category.
+Surg.Oth.Reg.Dis stands for "surgery to other distant regions", and over
+\~42,000 out of 50,000 observations are in the "none/diagnosed at
+autopsy" category.
 
-Another 6000 of the remaining 8000 are NA's, meaning the variable contains little meaningful data for our investigations.
+Another 6000 of the remaining 8000 are NA's, meaning the variable
+contains little meaningful data for our investigations.
 
 <br/>
 
@@ -291,9 +249,12 @@ ggplot(df, aes(x=Surg.Rad.Seq)) +
         legend.text=element_text(size=6))
 ```
 
-The categories in this variable originally contained the order of surgery and or radiation. However, ~40,000 were again contained in the "no surgery" category.
+The categories in this variable originally contained the order of
+surgery and or radiation. However, \~40,000 were again contained in the
+"no surgery" category.
 
-Thus, the variable is collapsed into just two levels, one in which no surgery or radiation was used, and another where one or both were used.
+Thus, the variable is collapsed into just two levels, one in which no
+surgery or radiation was used, and another where one or both were used.
 
 <br/>
 
@@ -305,9 +266,13 @@ ggplot(df, aes(x=Systemic.Sur.Seq)) +
         legend.text=element_text(size=6))
 ```
 
-Similar to the previous variable, this one contains data involving the sequence of systemic surgery and therapy. Most of the observations are in the none level, another large portion are patients that got systemic therapy after surgery, and another large chunk is NA's.
+Similar to the previous variable, this one contains data involving the
+sequence of systemic surgery and therapy. Most of the observations are
+in the none level, another large portion are patients that got systemic
+therapy after surgery, and another large chunk is NA's.
 
-The presence of two substantial categories makes this a useful variable for our treatment related data science question.
+The presence of two substantial categories makes this a useful variable
+for our treatment related data science question.
 
 <br/>
 
@@ -317,13 +282,17 @@ ggplot(df, aes(x=Months.diag.to.treat)) +
   geom_bar(aes(fill=Months.diag.to.treat))
 ```
 
-Just like the Surg.Rad.Seq variable, almost all of the patients received treatment within 1 month of their diagnosis.
+Just like the Surg.Rad.Seq variable, almost all of the patients received
+treatment within 1 month of their diagnosis.
 
-Thus, the only way for the variable to be of any use is to make it binary, where one category is treatment within a month, and the other is one month or more.
+Thus, the only way for the variable to be of any use is to make it
+binary, where one category is treatment within a month, and the other is
+one month or more.
 
 <br/>
 
 ## Chase
+
 ```{r}
 unique(df$CS_tumor_size)
 summary(df$CS_tumor_size, na.rm = TRUE)
@@ -337,6 +306,7 @@ ggplot(data = df, aes(x = CS_tumor_size))+
 ```
 
 ## Frankie
+
 ```{r}
 #Numerical variable of nodes examined
 summary(df$nodes_examined_num)
@@ -364,14 +334,17 @@ ggplot(df) +
 ```
 
 <br/>
+
 ```{r}
 ggplot(df) +
   geom_bar(aes(x = race))
 ```
 
-The vast majority of individuals with a tumor in their testis are white. 
-We checked the overall demographics of the seer data and found it was primarily white. 
-Because we do not have access to the counties in which the individuals reported from, it is difficult to gauge whether this is an issue or not.
+The vast majority of individuals with a tumor in their testis are white.
+We checked the overall demographics of the seer data and found it was
+primarily white. Because we do not have access to the counties in which
+the individuals reported from, it is difficult to gauge whether this is
+an issue or not.
 
 <br/>
 
@@ -398,8 +371,8 @@ Most patients were either married, or single (never married)
 ggplot(df) +
   geom_bar(aes(x = situ.malignant.tumors))
 ```
-Changed to binary (One tumor or More than one tumor)
 
+Changed to binary (One tumor or More than one tumor)
 
 ```{r}
 ggplot(df, aes(x = tm.3.1998.2003, fill = tm.3.1998.2003)) +
@@ -409,8 +382,91 @@ ggplot(df, aes(x = tm.3.1998.2003, fill = tm.3.1998.2003)) +
         legend.text = element_text(size = 7))
 ```
 
-Tons of 'NA' values in tumor marker variables, probably in part do them not spanning all years.
+Tons of 'NA' values in tumor marker variables, probably in part do them
+not spanning all years.
 
+# Modeling
 
+### Survival Analysis
 
+```{r}
+df$testi_death <- ifelse(df$death.site == "Testis", 1, 0)
+df$SurvObj <- with(df, Surv(survival.months, testi_death == 1))
+```
 
+```{r}
+km <- survfit(SurvObj ~ 1, data = df, conf.type = "log-log")
+
+km.trt <- survfit(SurvObj ~ Surg.Rad.Seq, data = df, conf.type = "log-log")
+
+ggs <- ggsurvplot(
+  fit = survfit(Surv(survival.months, testi_death) ~ Surg.Rad.Seq, data = df), 
+  xlab = "Months", 
+  ylab = "Overall survival probability") 
+
+ggs$plot <- ggs$plot + ylim(c(0.9, 1))
+
+ggs
+```
+
+```{r}
+ggs <- ggsurvplot(
+  fit = survfit(Surv(survival.months, testi_death) ~ marital.status.at.diagnosis, data = df), 
+  xlab = "Months", 
+  ylab = "Overall survival probability") 
+
+ggs$plot <- ggs$plot + ylim(c(0.9, 1))
+
+ggs
+```
+
+```{r}
+mod <- coxph(Surv(survival.months, testi_death) ~ race + Surg.Rad.Seq + Months.diag.to.treat + marital.status.at.diagnosis, data = df)
+# %>% gtsummary::tbl_regression(exp = TRUE)
+```
+
+### Checking Cox Proportional Hazards assumptions
+
+```{r}
+test.ph <- cox.zph(mod)
+```
+
+From the output above, the test is not statistically significant for the
+global test as well as each of the covariates. Therefore, we can assume
+the proportional hazards.
+
+```{r}
+ggcoxzph(test.ph)
+```
+
+No pattern with time (supports the use of proportional hazards)
+
+### Model Performance
+
+```{r}
+summary(mod)
+```
+
+### Interpretations
+
+```{r}
+gtsummary::tbl_regression(mod, exp = TRUE)
+```
+
+Based on the above regression table, we can interpret the following
+information from our model:
+
+-   Marital status:
+
+    -   Patients that were married at the time of diagnosis had half
+        (0.4, 0.64) the risk of death due to testicular cancer compared
+        to patients that were divorced at the time of diagnosis. (p \<
+        0.001)
+
+    -   Patients separated from their partner at diagnosis had higher
+        risk of death to testicular cancer than divorced patients by a
+        factor of 1.56 (1.01, 2.39) (p = 0.044).
+
+    -   These observations point towards a trend where patients that are
+        more lonely, or have less emotional support are at more risk of
+        death to their diagnosed testicular cancer.
