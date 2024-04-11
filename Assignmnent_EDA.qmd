@@ -43,11 +43,16 @@ library(dplyr)
 library(ggplot2)
 library(survminer)
 library(survival)
+```
 
-df <- read.csv("C:/Users/cjhet/Documents/testis.csv") # This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.
+```{r}
+#df <- read.csv("C:/Users/cjhet/Documents/testis.csv") 
+df <- read.csv("C:/data/testi.csv")
+# This data is a subset of our original data only inclusinf observations whose primary site was on their testicles.
 
 df[df == "Blank(s)"] <- NA
 ```
+
 
 ```{r}
 # Jhet's DM
@@ -443,6 +448,7 @@ No pattern with time (supports the use of proportional hazards)
 
 ### Model Performance
 
+
 ```{r}
 summary(mod)
 ```
@@ -456,7 +462,7 @@ gtsummary::tbl_regression(mod, exp = TRUE)
 Based on the above regression table, we can interpret the following
 information from our model:
 
--   Marital status:
+-   *Marital status:*
 
     -   Patients that were married at the time of diagnosis had half
         (0.4, 0.64) the risk of death due to testicular cancer compared
@@ -470,3 +476,6 @@ information from our model:
     -   These observations point towards a trend where patients that are
         more lonely, or have less emotional support are at more risk of
         death to their diagnosed testicular cancer.
+        
+        
+-   *Months from diagnosis to treatment:* The hazard for death was higher for patients not receiving treatment for at least a month after being diagnosed by a factor of 2.16 (95% CI: 1.90 - 2.45, p= 0.001). The control for this variable were patients treated within a month of the diagnosis.
