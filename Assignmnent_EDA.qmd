@@ -220,10 +220,27 @@ ggs
 
 
 ```{r}
-coxph(Surv(survival.months, testi_death) ~ race + Surg.Rad.Seq + Months.diag.to.treat + marital.status.at.diagnosis, data = df) %>% gtsummary::tbl_regression(exp = TRUE)
+mod <- coxph(Surv(survival.months, testi_death) ~ race + Surg.Rad.Seq + Months.diag.to.treat + marital.status.at.diagnosis, data = df)
+# %>% gtsummary::tbl_regression(exp = TRUE)
 ```
 
 
+### Checking Cox Proportional Hazards assumptions
+```{r}
+test.ph <- cox.zph(mod)
+```
+From the output above, the test is not statistically significant for the global test as well as each of the covariates. Therefore, we can assume the proportional hazards.
+
+```{r}
+ggcoxzph(test.ph)
+```
+No pattern with time (supports the use of proportional hazards)
+
+
+### Model Performance
+```{r}
+summary(mod)
+```
 
 # Explorartory Data Analysis
 
