@@ -28,14 +28,17 @@ The questions we aim to solve with our data are the following:
         experience while undergoing different treatments may also help
         us better understand the effectiveness of each treatment.
 
--   Has the survival rate of testi cancer increased/decreased over
-    time?
+-  How does the survival rate/months change based on the marital status
+    of the patient?
+    
+    -   
+    
+    
+    
+Abstract:
 
-    -   Knowing the direction in which the survival rate moves allows us
-        to question why it moves in said direction. If the survival rate
-        has increased over time, we may ask: Has better
-        medicine/treatment options led to this increase in survival
-        rate?
+Testicular cancer is one of the most common types of cancer in both adolescent and young adult males. Fortunately, it has a high five-year survival rate of about 95%. The data used in our analysis comes from the Surveillance, Epidemiology, and End Results Program (SEER) database. Multiple survival analysis methodologies were applied including Kaplan-Meier estimator and Cox proportional hazards regression. Key factors such as race, marital status, months from diagnosis to treatment, and order in which radiation and surgery were performed were all included in the analysis. Our model was found to be significant by three tests. It was found treatment, diagnosis timing, marital status, and race to be significant in predicting survival outcomes among those with testicular cancer. Survival analysis serves as a significant tool in investigating the history of testicular cancer. The findings of this study can assist in clinical decision making, improving patient care, and ultimately working towards a greater survival rate for those with this disease.
+
 
 # Data Management
 ```{r}
@@ -140,7 +143,6 @@ df$positive_nodes_cat <- ifelse(df$Regional_positive_node == 0, "All nodes negat
 df$positive_nodes_cat <- factor(df$positive_nodes_cat)
 ```
 
-Created several new variables to help with the analysis of the data. With the new variables we no longer need to reference the codes as much as before. 
 
 ```{r}
 #Saul's DM
@@ -197,6 +199,7 @@ df <- df %>% select(id, age,
                     nodes_examined_cat)
 ```
 
+Created several new variables to help with the analysis of the data. With the new variables we no longer need to reference the codes as much as before. 
 
 ```{r}
 df$testi_death <- ifelse(df$death.site == "Testis", 1, 0)
@@ -233,7 +236,7 @@ coxph(Surv(survival.months, testi_death) ~ race + Scope.Reg.LN.Sur + Surg.Oth.Re
 
 # Exploratory Data Analysis
 
-```{r, echo = FALSE}
+```{r}
 summary(df)
 ```
 ## Jhet
@@ -313,20 +316,20 @@ Thus, the only way for the variable to be of any use is to make it binary, where
 <br/>
 
 ## Chase
-```{r, echo = FALSE}
+```{r}
 unique(df$CS_tumor_size)
 summary(df$CS_tumor_size, na.rm = TRUE)
 sd(df$CS_tumor_size, na.rm = TRUE)
 ```
 
-```{r, echo = FALSE}
+```{r}
 ggplot(data = df, aes(x = CS_tumor_size))+
   geom_histogram(fill="blue",color="white")+
   labs(x='Tumor Size', y='Frequency', title = 'Tumor Size Histogram')
 ```
 
 ## Frankie
-```{r, echo = FALSE}
+```{r}
 #Numerical variable of nodes examined
 summary(df$nodes_examined_num)
 
@@ -334,7 +337,7 @@ summary(df$nodes_examined_num)
 table(df$nodes_examined_cat)
 ```
 
-```{r, echo = FALSE}
+```{r}
 #positive nodes numerical variable
 summary(df$positive_nodes_num)
 
@@ -400,6 +403,94 @@ ggplot(df, aes(x = tm.3.1998.2003, fill = tm.3.1998.2003)) +
 
 Tons of 'NA' values in tumor marker variables, probably in part do them not spanning all years.
 
+# Modeling
+
+### Survival Analysis
+
+```{r}
+df$testi_death <- ifelse(df$death.site == "Testis", 1, 0)
+df$SurvObj <- with(df, Surv(survival.months, testi_death == 1))
+```
+
+```{r}
+km <- survfit(SurvObj ~ 1, data = df, conf.type = "log-log")
+
+km.trt <- survfit(SurvObj ~ Surg.Rad.Seq, data = df, conf.type = "log-log")
+
+ggs <- ggsurvplot(
+  fit = survfit(Surv(survival.months, testi_death) ~ Surg.Rad.Seq, data = df), 
+  xlab = "Months", 
+  ylab = "Overall survival probability") 
+
+ggs$plot <- ggs$plot + ylim(c(0.9, 1))
+
+ggs
+```
+
+```{r}
+ggs <- ggsurvplot(
+  fit = survfit(Surv(survival.months, testi_death) ~ marital.status.at.diagnosis, data = df), 
+  xlab = "Months", 
+  ylab = "Overall survival probability") 
+
+ggs$plot <- ggs$plot + ylim(c(0.9, 1))
+
+ggs
+```
+
+```{r}
+mod <- coxph(Surv(survival.months, testi_death) ~ race + Surg.Rad.Seq + Months.diag.to.treat + marital.status.at.diagnosis, data = df)
+# %>% gtsummary::tbl_regression(exp = TRUE)
+```
+The p-vales for all three overall tests (Likelihood, Wald, and Score) are less than .01, indicating the model is significant and rejecting the null hypothesis that all betas are 0. The coefficients of Black and Pacific Islander or Asian are both positive which indicates a higher hazard ratio, but both groups have p-values of 0.140318 > .05 and 0.806804 > .05 respectively signaling they are not statistically significant. The unknown race has a negative coefficient which indicates a lower hazard ratio and is statistically significant with a p-value = 0.000360 < .05. The coefficient of White is negative, which suggests a lower hazard ratio, but is not statistically significant p-value = 0.575 > .05. 
+
+### Checking Cox Proportional Hazards assumptions
+
+```{r}
+test.ph <- cox.zph(mod)
+```
+
+From the output above, the test is not statistically significant for the
+global test as well as each of the covariates. Therefore, we can assume
+the proportional hazards.
+
+```{r}
+ggcoxzph(test.ph)
+```
+
+No pattern with time (supports the use of proportional hazards)
+
+### Model Performance
 
 
+```{r}
+summary(mod)
+```
+
+### Interpretations
+
+```{r}
+gtsummary::tbl_regression(mod, exp = TRUE)
+```
+
+Based on the above regression table, we can interpret the following
+information from our model:
+
+-   *Marital status:*
+
+    -   Patients that were married at the time of diagnosis had half
+        (0.4, 0.64) the risk of death due to testicular cancer compared
+        to patients that were divorced at the time of diagnosis. (p \<
+        0.001)
+
+    -   Patients separated from their partner at diagnosis had higher
+        risk of death to testicular cancer than divorced patients by a
+        factor of 1.56 (1.01, 2.39) (p = 0.044).
+
+    -   These observations point towards a trend where patients that are
+        more lonely, or have less emotional support are at more risk of
+        death to their diagnosed testicular cancer.
+        
+        
+-   *Months from diagnosis to treatment:* The hazard for death was higher for patients not receiving treatment for at least a month after being diagnosed by a factor of 2.16 (95% CI: 1.90 - 2.45, p= 0.001). The control for this variable were patients treated within a month of the diagnosis.
 
