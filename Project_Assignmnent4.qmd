@@ -192,7 +192,7 @@ df <- df %>% mutate(
                                              "Seperated/widowed/divorced" = c("Widowed", "Separated", "Divorced"),
                                              "Single/unmarried" = c("Single (never married)", "Unmarried or Domestic Partner"))) 
 
-
+df$marital.status.at.diagnosis <- relevel(df$marital.status.at.diagnosis, ref = "Married (including common law)")
 
 
 df <- df %>% select(id, age,
