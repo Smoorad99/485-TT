@@ -43,6 +43,7 @@ library(dplyr)
 library(ggplot2)
 library(survminer)
 library(survival)
+library(forcats)
 #df <- read.csv("C:/Users/cjhet/Documents/testis.csv") # This data is a subset of our original data only inclusion observations whose primary site was on their testicles.
 df <- read.csv("C:/data/testi.csv")
 df[df == "Blank(s)"] <- NA
@@ -180,6 +181,19 @@ df <- df %>% mutate(
                           "9" = "Unknown or no information",
                           "14" = " Blank")
 )
+
+
+
+
+## collapsing marital status
+
+df <- df %>% mutate(
+  marital.status.at.diagnosis = fct_collapse(marital.status.at.diagnosis,
+                                             "Seperated/widowed/divorced" = c("Widowed", "Separated", "Divorced"),
+                                             "Single/unmarried" = c("Single (never married)", "Unmarried or Domestic Partner"))) 
+
+
+
 
 df <- df %>% select(id, age,
                     race, death.site, cause.specific,
