@@ -44,8 +44,8 @@ library(ggplot2)
 library(survminer)
 library(survival)
 library(forcats)
-#df <- read.csv("C:/Users/cjhet/Documents/testis.csv") # This data is a subset of our original data only inclusion observations whose primary site was on their testicles.
-df <- read.csv("C:/data/testi.csv")
+df <- read.csv("C:/Users/cjhet/Documents/testis.csv") # This data is a subset of our original data only inclusion observations whose primary site was on their testicles.
+# df <- read.csv("C:/data/testi.csv")
 df[df == "Blank(s)"] <- NA
 
 ```
@@ -189,11 +189,17 @@ df <- df %>% mutate(
 
 df <- df %>% mutate(
   marital.status.at.diagnosis = fct_collapse(marital.status.at.diagnosis,
-                                             "Seperated/widowed/divorced" = c("Widowed", "Separated", "Divorced"),
+                                             "Separated/widowed/divorced" = c("Widowed", "Separated", "Divorced"),
                                              "Single/unmarried" = c("Single (never married)", "Unmarried or Domestic Partner"))) 
 
 df$marital.status.at.diagnosis <- relevel(df$marital.status.at.diagnosis, ref = "Married (including common law)")
 
+df <- df %>% mutate(
+  race = fct_collapse(race,
+                      "Native American/AAPI" = c("American Indian/Alaska Native", "Asian or Pacific Islander"))
+)
+
+df$race <- relevel(df$race, ref = "White")
 
 df <- df %>% select(id, age,
                     race, death.site, cause.specific,
@@ -394,36 +400,54 @@ Tons of 'NA' values in tumor marker variables, probably in part do them not span
 
 ### Survival Analysis
 
+
 ```{r}
 df$testi_death <- ifelse(df$death.site == "Testis", 1, 0)
 df$SurvObj <- with(df, Surv(survival.months, testi_death == 1))
 ```
 
-```{r}
+```{r fig.height=5, fig.width=8}
 km <- survfit(SurvObj ~ 1, data = df, conf.type = "log-log")
 
 km.trt <- survfit(SurvObj ~ Surg.Rad.Seq, data = df, conf.type = "log-log")
 
+rxLabs <- c("No Treatment", "Surgery and/or Radiation")
 ggs <- ggsurvplot(
   fit = survfit(Surv(survival.months, testi_death) ~ Surg.Rad.Seq, data = df), 
   xlab = "Months", 
-  ylab = "Overall survival probability") 
+  ylab = "Overall survival probability",
+  legend.labs = rxLabs) 
 
 ggs$plot <- ggs$plot + ylim(c(0.9, 1))
 
 ggs
+
+raceLabs <- c("Native American/AAPI", "Black", "Unknown", "White")
+race <- ggsurvplot(
+  fit = survfit(Surv(survival.months, testi_death) ~ race, data = df), 
+  xlab = "Months", 
+  ylab = "Overall survival probability",
+  legend.labs = raceLabs,) 
+
+race$plot <- race$plot + ylim(c(0.9, 1))
+
+race
 ```
 
 ```{r}
+marLabs <- c("Married", "Separated/Widowed/Divorced", "Single/Unmarried", "Unknown")
 ggs <- ggsurvplot(
   fit = survfit(Surv(survival.months, testi_death) ~ marital.status.at.diagnosis, data = df), 
   xlab = "Months", 
-  ylab = "Overall survival probability") 
+  ylab = "Overall survival probability",
+  legend.labs = marLabs) 
 
 ggs$plot <- ggs$plot + ylim(c(0.9, 1))
 
 ggs
 ```
+
+
 
 ```{r}
 mod <- coxph(Surv(survival.months, testi_death) ~ race + Surg.Rad.Seq + Months.diag.to.treat + marital.status.at.diagnosis, data = df)
