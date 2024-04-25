@@ -44,6 +44,7 @@ library(ggplot2)
 library(survminer)
 library(survival)
 library(forcats)
+library(gtsummary)
 df <- read.csv("C:/Users/cjhet/Documents/testis.csv") # This data is a subset of our original data only inclusion observations whose primary site was on their testicles.
 # df <- read.csv("C:/data/testi.csv")
 df[df == "Blank(s)"] <- NA
@@ -485,6 +486,36 @@ summary(mod)
 
 ```{r}
 gtsummary::tbl_regression(mod, exp = TRUE)
+```
+
+```{r}
+# Sexy table for summary statistics
+Twohot2table <- df %>% mutate(
+  `Survival Months` = survival.months,
+  `Marital Status at Diagnosis` = marital.status.at.diagnosis,
+  `Death by Testcular Cancer` = testi_death,
+  Race = race,
+  `Sequence of Surgery and/or Radiation` = Surg.Rad.Seq,
+  `Months After Diagnosis and Before Treatment` = Months.diag.to.treat) %>% 
+  select(`Survival Months`, `Death by Testcular Cancer`, `Marital Status at Diagnosis`, `Race`, `Sequence of Surgery and/or Radiation`, `Months After Diagnosis and Before Treatment`)
+
+Twohot2table %>%
+  tbl_summary(
+    missing = "no",
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} / {N} ({p}%)")) |>
+  italicize_labels() |> as_gt() 
+#gtsave(filename = here::here("manuscript files/table1b.png"))
+```
+
+```{r}
+#Sexy table for model
+mod.tab <- coxph(Surv(`Survival Months`, `Death by Testcular Cancer`) ~ `Marital Status at Diagnosis` + Race + `Months After Diagnosis and Before Treatment` + `Sequence of Surgery and/or Radiation`, data = Twohot2table)|>
+  tbl_regression(exponentiate = TRUE) |> italicize_labels()
+ 
+  
+  # add_glance_table(include = c(adj.r.squared, nobs))
 ```
 
 Based on the above regression table, we can interpret the following
