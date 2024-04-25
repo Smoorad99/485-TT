@@ -490,7 +490,7 @@ gtsummary::tbl_regression(mod, exp = TRUE)
 ```
 
 ```{r}
-# Sexy table for summary statistics
+# table for summary statistics
 Twohot2table <- df %>% mutate(
   `Survival Months` = survival.months,
   `Marital Status at Diagnosis` = marital.status.at.diagnosis,
@@ -511,12 +511,9 @@ Twohot2table %>%
 ```
 
 ```{r}
-#Sexy table for model
+# table for model
 mod.tab <- coxph(Surv(`Survival Months`, `Death by Testcular Cancer`) ~ `Marital Status at Diagnosis` + Race + `Months After Diagnosis and Before Treatment` + `Sequence of Surgery and/or Radiation`, data = Twohot2table)|>
-  tbl_regression(exponentiate = TRUE) |> italicize_labels()
- 
-  
-  # add_glance_table(include = c(adj.r.squared, nobs))
+  tbl_regression(exponentiate = TRUE) |> italicize_labels() |> add_glance_table(include = c(concordance, nobs)) |> as_gt() |> gtsave(filename = here::here("mod_stats.png"))
 ```
 
 Based on the above regression table, we can interpret the following
