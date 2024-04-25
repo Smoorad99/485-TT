@@ -45,8 +45,9 @@ library(survminer)
 library(survival)
 library(forcats)
 library(gtsummary)
-df <- read.csv("C:/Users/cjhet/Documents/testis.csv") # This data is a subset of our original data only inclusion observations whose primary site was on their testicles.
-# df <- read.csv("C:/data/testi.csv")
+library(gt)
+#df <- read.csv("C:/Users/cjhet/Documents/testis.csv") # This data is a subset of our original data only inclusion observations whose primary site was on their testicles.
+df <- read.csv("C:/data/testi.csv")
 df[df == "Blank(s)"] <- NA
 
 ```
@@ -497,7 +498,7 @@ Twohot2table <- df %>% mutate(
   Race = race,
   `Sequence of Surgery and/or Radiation` = Surg.Rad.Seq,
   `Months After Diagnosis and Before Treatment` = Months.diag.to.treat) %>% 
-  select(`Survival Months`, `Death by Testcular Cancer`, `Marital Status at Diagnosis`, `Race`, `Sequence of Surgery and/or Radiation`, `Months After Diagnosis and Before Treatment`)
+  select(`Survival Months`, `Death by Testcular Cancer`, `Marital Status at Diagnosis`, `Race`, `Sequence of Surgery and/or Radiation`, `Months After Diagnosis and Before Treatment`) 
 
 Twohot2table %>%
   tbl_summary(
@@ -505,8 +506,8 @@ Twohot2table %>%
     statistic = list(
       all_continuous() ~ "{mean} ({sd})",
       all_categorical() ~ "{n} / {N} ({p}%)")) |>
-  italicize_labels() |> as_gt() 
-#gtsave(filename = here::here("manuscript files/table1b.png"))
+  italicize_labels() |> as_gt() |> tab_options(
+    table.width = pct(60)) |> gtsave(filename = here::here("sum_stats.png"))
 ```
 
 ```{r}
